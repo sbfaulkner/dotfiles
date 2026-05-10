@@ -5,12 +5,12 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
     nix-darwin = {
-      url = "github:nix-community/nix-darwin/master";
+      url = "github:nix-community/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     home-manager = {
-      url = "github:nix-community/home-manager/master";
+      url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
