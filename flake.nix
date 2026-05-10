@@ -18,6 +18,11 @@
       url = "github:1Password/shell-plugins";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    try-cli = {
+      url = "github:tobi/try-cli";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs: {
@@ -34,6 +39,7 @@
           home-manager.backupFileExtension = "bak";
           home-manager.sharedModules = [
             inputs._1password-shell-plugins.hmModules.default
+            inputs.try-cli.homeModules.default
           ];
           home-manager.users.sbfaulkner = import ./home;
         }

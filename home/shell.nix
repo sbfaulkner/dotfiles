@@ -11,12 +11,12 @@
       "$HOME/src"
       "$HOME"
     ];
+  };
 
-    # Content added to ~/.zshrc for interactive shells.
-    initContent = ''
-      # try — experiment directory manager
-      eval "$(try init ~/src/tries)"
-    '';
+  # try — experiment directory manager
+  programs.try = {
+    enable = true;
+    path = "~/src/tries";
   };
 
   # 1Password shell plugins — installs op from Nix and enables credential
