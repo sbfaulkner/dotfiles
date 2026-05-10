@@ -25,6 +25,13 @@
     '';
   };
 
+  # 1Password shell plugins — installs op from Nix and enables credential
+  # injection for specified CLIs. Replaces the Homebrew 1password-cli cask.
+  programs._1password-shell-plugins = {
+    enable = true;
+    plugins = with pkgs; [ gh ];
+  };
+
   # Starship replaces spaceship. home-manager wires it into zsh automatically.
   programs.starship.enable = true;
 }
