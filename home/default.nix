@@ -3,6 +3,7 @@
 {
   imports = [
     ./git.nix
+    ./tools.nix
   ];
 
   # Required: tells home-manager who you are and where you live.
