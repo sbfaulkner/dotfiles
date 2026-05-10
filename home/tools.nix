@@ -2,11 +2,12 @@
 
 {
   home.packages = with pkgs; [
-    ejson    # encrypted secrets management
-    fd       # fast alternative to find
-    gh       # GitHub CLI
-    nodejs   # javascript runtime
-    pnpm     # fast, disk-efficient package manager (used at work too)
+    ejson      # encrypted secrets management
+    fastfetch  # system info summary
+    fd         # fast alternative to find
+    gh         # GitHub CLI
+    nodejs     # javascript runtime
+    pnpm       # fast, disk-efficient package manager (used at work too)
   ];
 
   # Set pnpm's global package directory.
