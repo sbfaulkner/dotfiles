@@ -1,9 +1,9 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 
 {
   # Allow packages with unfree licenses (e.g. 1password-cli).
   nixpkgs.config.allowUnfreePredicate = pkg:
-    builtins.elem (builtins.parseDrvName pkg.name).name [
+    builtins.elem (lib.getName pkg) [
       "1password-cli"
     ];
 
