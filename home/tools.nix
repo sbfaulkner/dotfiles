@@ -2,9 +2,9 @@
 
 {
   home.packages = with pkgs; [
+    ejson    # encrypted secrets management
     fd       # fast alternative to find
     gh       # GitHub CLI
-    ejson    # encrypted secrets management
     nodejs   # javascript runtime (+ npm)
   ];
 
