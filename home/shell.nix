@@ -16,12 +16,6 @@
     initContent = ''
       # try — experiment directory manager
       eval "$(try init ~/src/tries)"
-
-      # 1Password shell completion
-      if (( $+commands[op] )); then
-        eval "$(op completion zsh)"
-        compdef _op op
-      fi
     '';
   };
 
