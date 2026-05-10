@@ -7,6 +7,19 @@
       "1password-cli"
     ];
 
+  # Homebrew — managed declaratively, casks only.
+  # CLI tools belong in home-manager (home/tools.nix) instead.
+  homebrew = {
+    enable = true;
+    casks = [
+      "godot"
+    ];
+    onActivation = {
+      autoUpdate = true;
+      cleanup = "uninstall"; # remove casks not listed here
+    };
+  };
+
   # Tell nix-darwin about the user so home-manager can find the home directory.
   users.users.sbfaulkner.home = "/Users/sbfaulkner";
 
