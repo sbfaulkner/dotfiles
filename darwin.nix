@@ -7,6 +7,10 @@
       "1password-cli"
     ];
 
+  # Required by nix-darwin for options that apply to a specific user
+  # (e.g. homebrew). Set to the user running darwin-rebuild.
+  system.primaryUser = "sbfaulkner";
+
   # Homebrew — managed declaratively, casks only.
   # CLI tools belong in home-manager (home/tools.nix) instead.
   homebrew = {
