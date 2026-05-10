@@ -1,6 +1,9 @@
 { pkgs, ... }:
 
 {
+  # Tell nix-darwin about the user so home-manager can find the home directory.
+  users.users.sbfaulkner.home = "/Users/sbfaulkner";
+
   # The stateVersion marks when this config was first created.
   # Set it once on first install and never change it.
   system.stateVersion = 5;
