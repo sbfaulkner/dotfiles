@@ -1,6 +1,10 @@
 { pkgs, ... }:
 
 {
+  imports = [
+    ./git.nix
+  ];
+
   # Required: tells home-manager who you are and where you live.
   home.username = "sbfaulkner";
   home.homeDirectory = "/Users/sbfaulkner";
