@@ -1,6 +1,12 @@
 { pkgs, ... }:
 
 {
+  # Allow packages with unfree licenses (e.g. 1password-cli).
+  nixpkgs.config.allowUnfreePredicate = pkg:
+    builtins.elem (builtins.parseDrvName pkg.name).name [
+      "1password-cli"
+    ];
+
   # Tell nix-darwin about the user so home-manager can find the home directory.
   users.users.sbfaulkner.home = "/Users/sbfaulkner";
 
