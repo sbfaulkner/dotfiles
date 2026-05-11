@@ -104,11 +104,14 @@ rebuild
 ### Follow-up
 
 - [ ] Work machine: set up standalone home-manager on top of work-managed base environment
-- [ ] Add `devShells` outputs (`ruby-rails`, `go`, etc.) so standard projects can use `use flake <url>#ruby-rails` in `.envrc` with no local `flake.nix` — workhog and xprmnt are the seeds; decide whether these live in dotfiles or a separate repo (separate may be better for work machine portability)
+  - `home/default.nix` hardcodes `username`/`homeDirectory` — parameterize or move to host-specific modules before enabling `homeConfigurations.work`
+- [ ] Add `devShells` outputs (`ruby-rails`, `go`, etc.) so standard projects can use `use flake <url>#ruby-rails` in `.envrc` with no local `flake.nix` — workhog and xprmnt are the seeds; put these in a **separate repo** (e.g. `sbfaulkner/dev-shells`) for portability across machines
 - [ ] Add `templates` output as a fallback for non-standard projects that do need a local `flake.nix`
 - [ ] Package `pi` as a Nix derivation (currently a manual `pnpm add -g`)
 - [ ] Add more per-project flakes as needed (other repos in `~/src`)
-- [ ] Re-enable 1Password `gh` plugin (`home/shell.nix`) — disabled because it causes pi sessions to hang; need to investigate making the 1Password agent socket available in pi's shell environment
+- [ ] Re-enable 1Password `gh` plugin (`home/shell.nix`) — disabled because it causes pi sessions to hang; likely the 1Password agent socket (`~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock`) isn't available in pi's spawned shell — check if setting `SSH_AUTH_SOCK` or `OP_PLUGIN_ALIASES_SOURCED` in pi's env helps
+- [ ] Add `ripgrep` and `jq` to `home/tools.nix`
+- [ ] Configure `programs.zsh.history` — size, deduplication, share across sessions
 
 ---
 

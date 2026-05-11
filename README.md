@@ -37,3 +37,15 @@ rebuild
 Project-specific dev environments live in each repo as `flake.nix` + `.envrc` and are activated automatically by `direnv` on `cd`. The flake provides the language runtime and any native library dependencies; the project's own tooling (e.g. Bundler, Go modules) manages the rest.
 
 See `TODO.md` for current status and what's still in progress.
+
+## Work Machine Compatibility
+
+This config is designed to eventually share modules with the work machine
+(Apple Silicon, aarch64-darwin). At work, the system-level Nix setup is
+managed externally, so only **standalone home-manager** should be used there
+(no nix-darwin).
+
+The `flake.nix` has a commented-out `homeConfigurations.work` target for this.
+When enabling it, note that `home/default.nix` currently hardcodes `username`
+and `homeDirectory` — these will need to be parameterized or moved to
+host-specific modules.
