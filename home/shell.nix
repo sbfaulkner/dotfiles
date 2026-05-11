@@ -13,6 +13,7 @@
     ];
 
     shellAliases = {
+      a = "alias";
       h = "history";
     };
   };
