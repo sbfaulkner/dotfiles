@@ -77,11 +77,11 @@ Packages installed via home-manager (all from nixpkgs):
 - Provides: `go_1_26`, `gotools` (goyacc), `ragel`
 - `direnv allow` — activates automatically on `cd`
 
-**`workhog`** (Ruby/Rails) — 🔧 in progress
+**`workhog`** (Ruby/Rails) — ✅ working
 
-- `flake.nix` written, not yet committed
-- Provides: `ruby_3_3`, `sqlite`
-- `.envrc` not yet created
+- `flake.nix` + `.envrc` committed
+- Provides: `ruby_3_3`, `sqlite`, `libyaml` (psych gem)
+- `bundle install` verified working
 
 ---
 
@@ -98,7 +98,7 @@ rebuild
 
 ### Immediate
 
-- [ ] Finish `workhog` flake: add `.envrc`, test `bundle install`, commit
+- [x] Finish `workhog` flake: add `.envrc`, test `bundle install`, commit
 - [ ] Push dotfiles to GitHub (several commits behind)
 
 ### Follow-up
