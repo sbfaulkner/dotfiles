@@ -99,12 +99,14 @@ rebuild
 ### Immediate
 
 - [x] Finish `workhog` flake: add `.envrc`, test `bundle install`, commit
-- [ ] Push dotfiles to GitHub (several commits behind)
+- [x] Push dotfiles to GitHub
 
 ### Follow-up
 
-- [ ] Package `pi` as a Nix derivation (currently a manual `pnpm add -g`)
 - [ ] Work machine: set up standalone home-manager on top of work-managed base environment
+- [ ] Add `devShells` outputs (`ruby-rails`, `go`, etc.) so standard projects can use `use flake <url>#ruby-rails` in `.envrc` with no local `flake.nix` — workhog and xprmnt are the seeds; decide whether these live in dotfiles or a separate repo (separate may be better for work machine portability)
+- [ ] Add `templates` output as a fallback for non-standard projects that do need a local `flake.nix`
+- [ ] Package `pi` as a Nix derivation (currently a manual `pnpm add -g`)
 - [ ] Add more per-project flakes as needed (other repos in `~/src`)
 - [ ] Re-enable 1Password `gh` plugin (`home/shell.nix`) — disabled because it causes pi sessions to hang; need to investigate making the 1Password agent socket available in pi's shell environment
 
