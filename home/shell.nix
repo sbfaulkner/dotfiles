@@ -11,6 +11,10 @@
       "$HOME/src"
       "$HOME"
     ];
+
+    shellAliases = {
+      h = "history";
+    };
   };
 
   # try — experiment directory manager
