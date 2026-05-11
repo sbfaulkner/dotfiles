@@ -29,7 +29,7 @@
   # injection for specified CLIs. Replaces the Homebrew 1password-cli cask.
   programs._1password-shell-plugins = {
     enable = true;
-    plugins = with pkgs; [ gh ];
+    # plugins = with pkgs; [ gh ];  # disabled: causes pi sessions to hang (TODO: figure out how to make 1Password agent available in pi sessions)
   };
 
   # Starship replaces spaceship. home-manager wires it into zsh automatically.
