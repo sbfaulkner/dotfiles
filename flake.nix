@@ -40,18 +40,23 @@
           home-manager.sharedModules = [
             inputs._1password-shell-plugins.hmModules.default
             inputs.try-cli.homeModules.default
+            { _module.args.isWork = false; }
           ];
           home-manager.users.sbfaulkner = import ./home;
         }
       ];
     };
 
-    # Work machine — Apple Silicon, standalone home-manager on top of work toolchain
-    # Uncomment when ready to set up
-    # homeConfigurations.work = inputs.home-manager.lib.homeManagerConfiguration {
-    #   pkgs = inputs.nixpkgs.legacyPackages."aarch64-darwin";
-    #   modules = [ ./home ];
-    # };
+    # Work machine — Apple Silicon, standalone home-manager
+    homeConfigurations.work = inputs.home-manager.lib.homeManagerConfiguration {
+      pkgs = inputs.nixpkgs.legacyPackages."aarch64-darwin";
+      modules = [
+        ./home
+        inputs._1password-shell-plugins.hmModules.default
+        inputs.try-cli.homeModules.default
+        { _module.args.isWork = true; }
+      ];
+    };
 
   };
 }

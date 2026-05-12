@@ -40,7 +40,7 @@ Packages installed via home-manager (all from nixpkgs):
 - **zsh** managed by home-manager — oh-my-zsh removed entirely
 - **starship** — replaces spaceship prompt
 - **cdpath** — shortcuts for `~/src/github.com/sbfaulkner`, `~/src`, etc.
-- **aliases** — `a=alias`, `h=history`, `rebuild=sudo darwin-rebuild switch ...`
+- **aliases** — `a=alias`, `h=history`, `reflake=sudo darwin-rebuild switch ...`
 - **try** — via `github:tobi/try-cli` flake, shell function wired automatically
 - **1Password shell plugins** — `op` from Nix, credential injection for `gh`
 

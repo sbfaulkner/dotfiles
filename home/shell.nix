@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, isWork, ... }:
 
 {
   programs.zsh = {
@@ -15,7 +15,9 @@
     shellAliases = {
       a = "alias";
       h = "history";
-      reflake = "sudo darwin-rebuild switch --flake ~/src/github.com/sbfaulkner/dotfiles#sbfaulkner";
+      reflake = if isWork
+        then "home-manager switch --flake ~/src/github.com/sbfaulkner/dotfiles#work"
+        else "sudo darwin-rebuild switch --flake ~/src/github.com/sbfaulkner/dotfiles#sbfaulkner";
     };
   };
 
