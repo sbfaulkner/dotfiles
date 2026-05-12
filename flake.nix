@@ -52,6 +52,7 @@
       pkgs = inputs.nixpkgs.legacyPackages."aarch64-darwin";
       modules = [
         ./home
+        ./hosts/work.nix
         inputs._1password-shell-plugins.hmModules.default
         inputs.try-cli.homeModules.default
         { _module.args.isWork = true; }
