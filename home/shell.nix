@@ -15,7 +15,7 @@
     shellAliases = {
       a = "alias";
       h = "history";
-      rebuild = "sudo darwin-rebuild switch --flake ~/src/github.com/sbfaulkner/dotfiles#sbfaulkner";
+      reflake = "sudo darwin-rebuild switch --flake ~/src/github.com/sbfaulkner/dotfiles#sbfaulkner";
     };
   };
 

@@ -28,13 +28,13 @@ home/
 ## Applying Changes
 
 ```bash
-rebuild
+reflake
 # expands to: sudo darwin-rebuild switch --flake ~/src/github.com/sbfaulkner/dotfiles#sbfaulkner
 ```
 
 ## Bootstrap (new machine)
 
-**1. Install Xcode Command Line Tools**
+**1. Install Xcode Command Line Tools** (required by the Nix installer)
 ```bash
 xcode-select --install
 ```
@@ -51,26 +51,29 @@ Or Determinate installer (Apple Silicon only):
 curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
 ```
 
-**3. Clone dotfiles**
+**3. Bootstrap nix-darwin** (fetches the flake directly from GitHub — no clone needed)
+```bash
+nix run nix-darwin -- switch --flake github:sbfaulkner/dotfiles#sbfaulkner
+```
+
+**4. Clone dotfiles** (for making future edits)
 ```bash
 mkdir -p ~/src/github.com/sbfaulkner
 git clone https://github.com/sbfaulkner/dotfiles ~/src/github.com/sbfaulkner/dotfiles
 ```
 
-**4. Bootstrap nix-darwin** (`rebuild` alias doesn't exist yet on first run)
-```bash
-nix run nix-darwin -- switch --flake ~/src/github.com/sbfaulkner/dotfiles#sbfaulkner
-```
-
-After that, use `rebuild` for all subsequent changes.
+After that, use `reflake` for all subsequent changes.
 
 ### Managed machine (e.g. work)
 
-On a machine where you can't run nix-darwin, use standalone home-manager instead. Steps 1–3 are the same, then:
+On a machine where Nix is already installed but the system layer is managed
+externally, use standalone home-manager instead. Skip steps 1–2, then:
 
 ```bash
-nix run home-manager -- switch --flake ~/src/github.com/sbfaulkner/dotfiles#<host>
+nix run home-manager -- switch --flake github:sbfaulkner/dotfiles#work
 ```
+
+Clone the repo afterward for local edits.
 
 > **Note:** standalone home-manager configuration is not yet set up in this flake — see TODO.md.
 

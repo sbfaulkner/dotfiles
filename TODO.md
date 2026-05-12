@@ -85,10 +85,10 @@ Packages installed via home-manager (all from nixpkgs):
 
 ---
 
-## Rebuild Command
+## Reflake Command
 
 ```bash
-rebuild
+reflake
 # expands to: sudo darwin-rebuild switch --flake ~/src/github.com/sbfaulkner/dotfiles#sbfaulkner
 ```
 
