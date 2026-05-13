@@ -11,5 +11,8 @@
   # Exclude packages the work toolchain already provides, but keep
   # sessionVariablesPackage so hm-session-vars.sh ends up in the profile
   # (sourced by .zshenv).
-  home.packages = lib.mkForce [ config.home.sessionVariablesPackage ];
+  home.packages = lib.mkForce [
+    config.home.sessionVariablesPackage
+    pkgs.home-manager  # needed so `reflake` alias can find home-manager
+  ];
 }
