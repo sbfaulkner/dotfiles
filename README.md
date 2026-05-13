@@ -12,6 +12,8 @@ home/
   tools.nix      # user packages
   shell.nix      # zsh, starship, aliases, direnv, 1Password plugins
   git.nix        # git settings and global ignores
+hosts/
+  work.nix       # work-specific overrides for standalone home-manager
 ```
 
 ## What's Managed
@@ -25,11 +27,21 @@ home/
 | Casks | Homebrew (declarative) | GUI apps not in nixpkgs (e.g. Godot) |
 | Per-project deps | Project flakes + direnv | Language runtimes, native libs |
 
+## Configurations
+
+| Target | Platform | How |
+|---|---|---|
+| `darwinConfigurations.sbfaulkner` | x86_64-darwin (Intel Mac) | Full nix-darwin + home-manager |
+| `homeConfigurations.work` | aarch64-darwin (Apple Silicon) | Standalone home-manager only (system managed externally) |
+
+The work config (`hosts/work.nix`) disables direnv and packages (provided by the work toolchain) and adds work-specific shell aliases and PATH entries via `isWork`.
+
 ## Applying Changes
 
 ```bash
 reflake
-# expands to: sudo darwin-rebuild switch --flake ~/src/github.com/sbfaulkner/dotfiles#sbfaulkner
+# personal: sudo darwin-rebuild switch --flake ~/src/github.com/sbfaulkner/dotfiles#sbfaulkner
+# work:     home-manager switch --flake ~/src/github.com/sbfaulkner/dotfiles#work
 ```
 
 ## Bootstrap (new machine)
@@ -64,10 +76,10 @@ git clone https://github.com/sbfaulkner/dotfiles ~/src/github.com/sbfaulkner/dot
 
 After that, use `reflake` for all subsequent changes.
 
-### Managed machine (e.g. work)
+### Work machine
 
 On a machine where Nix is already installed but the system layer is managed
-externally, use standalone home-manager instead. Skip steps 1–2, then:
+externally, use standalone home-manager. Skip steps 1–2, then:
 
 ```bash
 nix run home-manager -- switch --flake github:sbfaulkner/dotfiles#work
@@ -75,22 +87,20 @@ nix run home-manager -- switch --flake github:sbfaulkner/dotfiles#work
 
 Clone the repo afterward for local edits.
 
-> **Note:** standalone home-manager configuration is not yet set up in this flake — see TODO.md.
-
 ## Per-Project Flakes
 
 Project-specific dev environments live in each repo as `flake.nix` + `.envrc` and are activated automatically by `direnv` on `cd`. The flake provides the language runtime and any native library dependencies; the project's own tooling (e.g. Bundler, Go modules) manages the rest.
 
-See `TODO.md` for current status and what's still in progress.
+## Key Decisions
 
-## Work Machine Compatibility
-
-This config is designed to eventually share modules with the work machine
-(Apple Silicon, aarch64-darwin). At work, the system-level Nix setup is
-managed externally, so only **standalone home-manager** should be used there
-(no nix-darwin).
-
-The `flake.nix` has a commented-out `homeConfigurations.work` target for this.
-When enabling it, note that `home/default.nix` currently hardcodes `username`
-and `homeDirectory` — these will need to be parameterized or moved to
-host-specific modules.
+| Decision | Reason |
+|---|---|
+| Official Nix installer over Determinate | Determinate dropped x86_64-darwin support |
+| pnpm over npm | Consistent with work setup |
+| `cleanup = "uninstall"` for Homebrew | Migration complete enough to be strict |
+| `allowUnfreePredicate` over `allowUnfree = true` | Only permits explicitly approved packages |
+| `try` via `tobi/try-cli` flake | Repo has its own flake with a home-manager module |
+| `pi` not in Nix (yet) | Updates too frequently; pnpm global is pragmatic for now |
+| `forAllSystems` in project flakes | Portable to Apple Silicon work machine |
+| Global gitignore for `.direnv/` | Managed by Nix; no need to add per-project |
+| nixpkgs 25.05 branch | Last release with x86_64-darwin; 26.05 drops it |
