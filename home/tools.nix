@@ -20,6 +20,7 @@
   # Set pnpm's global package directory.
   # Global binaries (e.g. pi) land directly in $PNPM_HOME.
   home.sessionVariables = {
+    EDITOR = "code --wait";
     LESS = "-RF";
     PNPM_HOME = "$HOME/.local/share/pnpm";
   };
