@@ -23,6 +23,10 @@
       # CDPATH — all org dirs under ~/src/github.com, plus src and home.
       cdpath=($HOME/src/github.com/*(N/) $HOME/src $HOME)
 
+      # Restore Ctrl-R incremental search in vi mode
+      bindkey -M viins '^R' history-incremental-search-backward
+      bindkey -M viins '^S' history-incremental-search-forward
+
       # Shell options
       unsetopt autocd
       unsetopt nomatch
