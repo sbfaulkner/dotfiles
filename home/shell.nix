@@ -20,9 +20,6 @@
     };
 
     initContent = ''
-      # PATH additions
-      path=($HOME/.local/share/pnpm $HOME/scripts $HOME/bin $path)
-
       # CDPATH — all org dirs under ~/src/github.com, plus src and home.
       cdpath=($HOME/src/github.com/*(N/) $HOME/src $HOME)
 
@@ -31,13 +28,6 @@
       unsetopt nomatch
       unsetopt hist_verify
       setopt rm_star_silent
-
-      # Editor — GUI when local, vim over SSH
-      if [[ -n $SSH_CONNECTION ]]; then
-        export EDITOR='vim'
-      else
-        export EDITOR='cursor --wait'
-      fi
 
       # secrets — load ejson secrets into env
       secrets() {

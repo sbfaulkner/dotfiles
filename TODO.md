@@ -10,5 +10,4 @@
 - [ ] Auto-update strategy: decide whether `reflake` should pull from the remote flake (no local clone needed) or from a local checkout; consider periodic auto-refresh (e.g. on new interactive shell, like oh-my-zsh did) — options include a zsh hook that checks staleness, a launchd timer, or just prompting when the local checkout is behind origin
 - [ ] Manage pi config (`~/.pi/`) via home-manager — extensions, skills, and settings need host-specific branching (work vs home have different extensions/skills available); ties into nixifying the pi installation itself
 - [ ] Audit remaining dotfiles on both machines for candidates to bring under Nix management (e.g. `~/.config/` dirs, `.ssh/config`, starship config, VS Code settings)
-- [ ] Fix editor inconsistency: `git.nix` sets `core.editor = "code --wait"` but `shell.nix` sets `EDITOR='cursor --wait'`
-- [ ] Clean up duplicate PATH: `shell.nix` initContent manually prepends paths that `home.sessionPath` already handles
+
