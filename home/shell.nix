@@ -47,6 +47,9 @@
 
       # --- Work-only below ---
 
+      # Silence shadowenv activation messages (version info already in prompt)
+      export SHADOWENV_SILENT=1
+
       # Homebrew shellenv (must come before work toolchain init)
       [[ -x /opt/homebrew/bin/brew ]] && eval $(/opt/homebrew/bin/brew shellenv)
 
@@ -95,6 +98,8 @@
   # Starship replaces spaceship. home-manager wires it into zsh automatically.
   programs.starship.enable = true;
   programs.starship.settings = {
+    command_timeout = 1000;
+
     # Disable noisy modules that aren't actionable day-to-day
     gcloud.disabled = true;
     nix_shell.disabled = true;
