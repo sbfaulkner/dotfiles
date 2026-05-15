@@ -98,7 +98,8 @@
   # Starship replaces spaceship. home-manager wires it into zsh automatically.
   programs.starship.enable = true;
   programs.starship.settings = {
-    command_timeout = 1000;
+    # Disable slow modules
+    git_status.disabled = true;
 
     # Disable noisy modules that aren't actionable day-to-day
     gcloud.disabled = true;
