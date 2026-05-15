@@ -8,6 +8,7 @@
     gh         # GitHub CLI
     nodejs     # javascript runtime
     pnpm       # fast, disk-efficient package manager (used at work too)
+    starship   # prompt — also managed by programs.starship, but this puts the CLI on PATH
   ];
 
   # direnv + nix-direnv: automatically activate per-project flake dev shells
