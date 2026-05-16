@@ -27,7 +27,9 @@
   };
 
   # Add pnpm global bin to PATH so installed tools (e.g. pi) are found.
+  # Add cargo/rustup bin so Rust toolchain is available in non-interactive shells (e.g. pi agent).
   home.sessionPath = [
     "$HOME/.local/share/pnpm"
+    "$HOME/.cargo/bin"
   ];
 }
