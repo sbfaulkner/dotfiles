@@ -3,6 +3,7 @@
 {
   home.packages = with pkgs; [
     ejson      # encrypted secrets management
+    ejson2env  # decrypt EJSON and export as env vars
     fastfetch  # system info summary
     fd         # fast alternative to find
     gh         # GitHub CLI
