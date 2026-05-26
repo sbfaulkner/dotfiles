@@ -12,7 +12,7 @@ let
   armName = "macOS_arm64";
   ghAssetName = if isAarch then "gh_${ghVersion}_${armName}.zip" else "gh_${ghVersion}_${amdName}.zip";
   ghUrl = "https://github.com/cli/cli/releases/download/v${ghVersion}/${ghAssetName}";
-  ghSha = if isAarch then "01qx3z6d1j993c2806lrsd2nzwzwnbjpjl27j1jys5bxppv5875i" else "1w1akm8zmsl2lwsih00fkgqs18il83qzhyfsv8dhg48dmckv76xf";
+  ghSha = if isAarch then "01qx3z6d1j993c2806lrsd2nzwzwnbjpjl27j1jys5bxppv5875i" else "1kb0yyls276vlrxdprpgm8g1aqig0ipid3j0bnxa53ia5dpxmy8m";
   ghSrc = pkgs.fetchzip {
     url = ghUrl;
     sha256 = ghSha;
