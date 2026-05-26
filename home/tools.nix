@@ -12,16 +12,16 @@ let
   armName = "macOS_arm64";
   ghAssetName = if isAarch then "gh_${ghVersion}_${armName}.zip" else "gh_${ghVersion}_${amdName}.zip";
   ghUrl = "https://github.com/cli/cli/releases/download/v${ghVersion}/${ghAssetName}";
-  ghSha = if isAarch then "01qx3z6d1j993c2806lrsd2nzwzwnbjpjl27j1jys5bxppv5875i" else "1w1akm8zmsl2lwsih00fkgqs18il83qzhyfsv8dhg48dmckv76xf";
+  ghSha = if isAarch then "01qx3z6d1j993c2806lrsd2nzwzwnbjpjl27j1jys5bxppv5875i" else "1kb0yyls276vlrxdprpgm8g1aqig0ipid3j0bnxa53ia5dpxmy8m";
   ghSrc = pkgs.fetchzip {
     url = ghUrl;
     sha256 = ghSha;
   };
   # Directory inside the zip: gh_<version>_<asset>/
-  ghDir = if isAarch then "gh_${ghVersion}_${armName}" else "gh_${ghVersion}_${amdName}";
+  # The release zips place the gh binary at bin/gh at the top level, so copy from there.
   ghBin = pkgs.runCommand "gh-${ghVersion}" { } ''
     mkdir -p $out/bin
-    cp ${ghSrc}/${ghDir}/bin/gh $out/bin/gh
+    cp ${ghSrc}/bin/gh $out/bin/gh
     chmod +x $out/bin/gh
   '';
 in
