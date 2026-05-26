@@ -12,10 +12,12 @@ let
   armName = "macOS_arm64";
   ghAssetName = if isAarch then "gh_${ghVersion}_${armName}.zip" else "gh_${ghVersion}_${amdName}.zip";
   ghUrl = "https://github.com/cli/cli/releases/download/v${ghVersion}/${ghAssetName}";
-  ghSha = if isAarch then "01qx3z6d1j993c2806lrsd2nzwzwnbjpjl27j1jys5bxppv5875i" else "1kb0yyls276vlrxdprpgm8g1aqig0ipid3j0bnxa53ia5dpxmy8m";
+  ghHash = if isAarch
+    then "sha256-4rVFCcMMaVwsg1yJxZKs5GWdEqculWamP0zWjjf9wXk="
+    else "sha256-FfnabysqjqK6XUCOFm8EL2IVHqrv5tt6ptscoan3YM0=";
   ghSrc = pkgs.fetchzip {
     url = ghUrl;
-    sha256 = ghSha;
+    hash = ghHash;
   };
   # Directory inside the zip: gh_<version>_<asset>/
   # The release zips place the gh binary at bin/gh at the top level, so copy from there.
@@ -35,7 +37,6 @@ in
     ghBin
     nodejs     # javascript runtime
     pnpm       # fast, disk-efficient package manager (used at work too)
-    starship   # prompt — also managed by programs.starship, but this puts the CLI on PATH
   ];
 
   # direnv + nix-direnv: automatically activate per-project flake dev shells

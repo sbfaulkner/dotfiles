@@ -14,6 +14,6 @@
   home.packages = lib.mkForce [
     config.home.sessionVariablesPackage
     pkgs.home-manager  # needed so `reflake` alias can find home-manager
-    pkgs.starship      # prompt CLI (explain, toggle, etc.) — programs.starship handles init
+    config.programs.starship.package  # prompt CLI (explain, toggle, etc.)
   ];
 }
