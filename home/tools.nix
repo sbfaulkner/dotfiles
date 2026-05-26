@@ -18,10 +18,10 @@ let
     sha256 = ghSha;
   };
   # Directory inside the zip: gh_<version>_<asset>/
-  ghDir = if isAarch then "gh_${ghVersion}_${armName}" else "gh_${ghVersion}_${amdName}";
+  # The release zips place the gh binary at bin/gh at the top level, so copy from there.
   ghBin = pkgs.runCommand "gh-${ghVersion}" { } ''
     mkdir -p $out/bin
-    cp ${ghSrc}/${ghDir}/bin/gh $out/bin/gh
+    cp ${ghSrc}/bin/gh $out/bin/gh
     chmod +x $out/bin/gh
   '';
 in
