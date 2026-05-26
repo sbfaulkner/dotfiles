@@ -2,16 +2,23 @@
 
 let
   ghVersion = "2.92.0";
-  ghUrl = "https://github.com/cli/cli/releases/download/v${ghVersion}/gh_${ghVersion}_macOS_amd64.zip";
-  ghSha = "1w1akm8zmsl2lwsih00fkgqs18il83qzhyfsv8dhg48dmckv76xf"; # pinned via nix-prefetch-url
+  # Detect current system (e.g. "x86_64-darwin" or "aarch64-darwin") and
+  # choose the matching release asset and pinned sha.
+  isAarch = builtins.substring 0 7 builtins.currentSystem == "aarch64";
+  amdName = "macOS_amd64";
+  armName = "macOS_arm64";
+  ghAssetName = if isAarch then "gh_${ghVersion}_${armName}.zip" else "gh_${ghVersion}_${amdName}.zip";
+  ghUrl = "https://github.com/cli/cli/releases/download/v${ghVersion}/${ghAssetName}";
+  ghSha = if isAarch then "01qx3z6d1j993c2806lrsd2nzwzwnbjpjl27j1jys5bxppv5875i" else "1w1akm8zmsl2lwsih00fkgqs18il83qzhyfsv8dhg48dmckv76xf";
   ghSrc = pkgs.fetchzip {
     url = ghUrl;
     sha256 = ghSha;
   };
+  # Directory inside the zip: gh_<version>_<asset>/
+  ghDir = if isAarch then "gh_${ghVersion}_${armName}" else "gh_${ghVersion}_${amdName}";
   ghBin = pkgs.runCommand "gh-${ghVersion}" { } ''
     mkdir -p $out/bin
-    # zip layout: gh_<version>_macOS_amd64/bin/gh
-    cp ${ghSrc}/gh_${ghVersion}_macOS_amd64/bin/gh $out/bin/gh
+    cp ${ghSrc}/${ghDir}/bin/gh $out/bin/gh
     chmod +x $out/bin/gh
   '';
 in
