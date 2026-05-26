@@ -7,6 +7,10 @@
     ./tools.nix
   ];
 
+  # Suppress unread Home Manager news notices during rebuilds.
+  # News remains available manually via `home-manager news`.
+  news.display = "silent";
+
   # Required: tells home-manager who you are and where you live.
   home.username = "sbfaulkner";
   home.homeDirectory = "/Users/sbfaulkner";
