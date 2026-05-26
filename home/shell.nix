@@ -43,6 +43,11 @@
           echo "Secrets file not found: $EJSON"
         fi
       }
+
+      # load default secrets at shell startup (only if the secrets file exists)
+      if [ -f "$HOME/.secrets.d/secrets.ejson" ]; then
+        secrets
+      fi
     '' + lib.optionalString isWork ''
 
       # --- Work-only below ---
