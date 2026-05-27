@@ -2,7 +2,7 @@
   description = "sbfaulkner's dotfiles";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-25.05-darwin";  # last x86_64-darwin release will be 26.05
+    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-25.05-darwin";
 
     nix-darwin = {
       url = "github:nix-darwin/nix-darwin/nix-darwin-25.05";

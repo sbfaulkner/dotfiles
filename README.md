@@ -99,4 +99,4 @@ Project-specific dev environments live in each repo as `flake.nix` + `.envrc` an
 | `pi` not in Nix (yet) | Updates too frequently; pnpm global is pragmatic for now |
 | `forAllSystems` in project flakes | Portable to Apple Silicon work machine |
 | Global gitignore for `.direnv/` | Managed by Nix; no need to add per-project |
-| nixpkgs 25.05 branch | Last release with x86_64-darwin; 26.05 drops it |
+| nixpkgs 25.05 branch | Pinned darwin branch used for compatibility |
