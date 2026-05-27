@@ -2,7 +2,10 @@
   description = "sbfaulkner's dotfiles";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-25.05-darwin";
+    # Track the nixpkgs repository (follow latest darwin-aware releases). Using the
+    # unpinned nixpkgs input lets us pick up darwin fixes while keeping nix-darwin
+    # and home-manager inputs in sync via inputs.nixpkgs.follows below.
+    nixpkgs.url = "github:NixOS/nixpkgs";
 
     nix-darwin = {
       url = "github:nix-darwin/nix-darwin/nix-darwin-25.05";
