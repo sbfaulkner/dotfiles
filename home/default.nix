@@ -2,6 +2,7 @@
 
 {
   imports = [
+    ./ghostty.nix
     ./git.nix
     ./shell.nix
     ./tools.nix

@@ -9,6 +9,7 @@ flake.nix        # entry point — inputs and darwinConfigurations
 darwin.nix       # system-level config (nix-darwin)
 home/
   default.nix    # home-manager entry point
+  ghostty.nix    # shared Ghostty terminal config
   tools.nix      # user packages
   shell.nix      # zsh, starship, aliases, direnv, 1Password plugins
   git.nix        # git settings and global ignores
@@ -28,7 +29,7 @@ scripts/
 | User packages | home-manager | CLI tools, runtimes, dev utilities |
 | Shell | home-manager | zsh, starship, direnv, aliases |
 | Git | home-manager | global config and gitignore |
-| Casks | Homebrew (declarative) | GUI apps not in nixpkgs (e.g. Godot) |
+| Casks | Homebrew (declarative) | Personal GUI apps (1Password, Chrome, Ghostty, Godot) |
 | Per-project deps | Project flakes + direnv | Language runtimes, native libs |
 
 ## Configurations
@@ -77,7 +78,8 @@ rm -f "$script"
 
 The personal target checks prerequisites, offers to uninstall an existing
 Determinate Nix install via `/nix/nix-installer uninstall`, installs Determinate
-Nix, installs Homebrew if needed, runs nix-darwin from the GitHub flake, and
+Nix, installs Homebrew if needed, runs nix-darwin from the GitHub flake, installs
+personal Homebrew casks (1Password, Ghostty, Godot, and Google Chrome), and
 clones this repo to `~/src/github.com/sbfaulkner/dotfiles`.
 
 For a non-interactive personal run, pass both `--target personal` and `--yes`:
@@ -149,6 +151,17 @@ nix --extra-experimental-features 'nix-command flakes' run github:nix-community/
 
 Clone the repo afterward for local edits if you use the manual command.
 
+## Ghostty
+
+Home Manager manages shared Ghostty config at `~/.config/ghostty/config` for
+both personal and work machines. The personal nix-darwin configuration installs
+the Ghostty app via Homebrew cask; work machines manage the config only and leave
+the app install to the external work setup.
+
+On activation, Home Manager backs up legacy macOS-specific Ghostty config files
+from `~/Library/Application Support/com.mitchellh.ghostty/` to
+`*.before-home-manager` so they cannot override the managed XDG config.
+
 ## Per-Project Flakes
 
 Project-specific dev environments live in each repo as `flake.nix` + `.envrc` and are activated automatically by `direnv` on `cd`. The flake provides the language runtime and any native library dependencies; the project's own tooling (e.g. Bundler, Go modules) manages the rest.
@@ -164,6 +177,7 @@ Project-specific dev environments live in each repo as `flake.nix` + `.envrc` an
 | `allowUnfreePredicate` over `allowUnfree = true` | Only permits explicitly approved packages |
 | `try` via `tobi/try-cli` flake | Repo has its own flake with a home-manager module |
 | `pi` not in Nix (yet) | Updates too frequently; pnpm global is pragmatic for now |
+| Ghostty config uses XDG path | Shared across personal and work; legacy macOS config is backed up so it cannot override XDG |
 | `forAllSystems` in project flakes | Portable to Apple Silicon work machine |
 | Global gitignore for `.direnv/` | Managed by Nix; no need to add per-project |
 | nixpkgs-unstable tracking branch | Track current Darwin fixes while `flake.lock` pins exact revisions |

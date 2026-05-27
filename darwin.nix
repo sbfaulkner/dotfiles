@@ -16,7 +16,10 @@
   homebrew = {
     enable = true;
     casks = [
+      "1password"
+      "ghostty"
       "godot"
+      "google-chrome"
     ];
     onActivation = {
       autoUpdate = true;
