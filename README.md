@@ -105,6 +105,10 @@ Determinate installer (recommended for Apple Silicon):
 curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
 ```
 
+Because Determinate manages the Nix daemon and `/etc/nix/nix.conf`, this
+nix-darwin configuration sets `nix.enable = false` and leaves the Nix
+installation itself to Determinate.
+
 **3. Install Homebrew** (required by the nix-darwin Homebrew module)
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -112,7 +116,7 @@ curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix 
 
 **4. Bootstrap nix-darwin** (fetches the flake directly from GitHub — no clone needed)
 ```bash
-sudo /nix/var/nix/profiles/default/bin/nix --extra-experimental-features 'nix-command flakes' run github:nix-darwin/nix-darwin/master#darwin-rebuild -- switch --flake github:sbfaulkner/dotfiles#sbfaulkner
+sudo -H /nix/var/nix/profiles/default/bin/nix --extra-experimental-features 'nix-command flakes' run github:nix-darwin/nix-darwin/master#darwin-rebuild -- switch --flake github:sbfaulkner/dotfiles#sbfaulkner
 ```
 
 **5. Clone dotfiles** (for making future edits)
@@ -154,6 +158,7 @@ Project-specific dev environments live in each repo as `flake.nix` + `.envrc` an
 | Decision | Reason |
 |---|---|
 | Determinate installer preferred | Better support for Apple Silicon installs |
+| `nix.enable = false` in nix-darwin | Determinate manages the Nix daemon and `/etc/nix/nix.conf`; nix-darwin manages the rest |
 | pnpm over npm | Consistent with work setup |
 | `cleanup = "uninstall"` for Homebrew | Migration complete enough to be strict |
 | `allowUnfreePredicate` over `allowUnfree = true` | Only permits explicitly approved packages |
