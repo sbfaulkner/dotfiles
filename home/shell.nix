@@ -4,12 +4,10 @@ let
   starshipVersion = "1.25.1";
   # Starship 1.25 adds git_branch.use_git_executable, which is needed for
   # repositories that use Git's reftable backend (e.g. Shopify's world repo).
-  systemStr = if builtins ? currentSystem then builtins.currentSystem else pkgs.system;
-  isAarch = builtins.substring 0 7 systemStr == "aarch64";
-  starshipTarget = if isAarch then "aarch64-apple-darwin" else "x86_64-apple-darwin";
-  starshipHash = if isAarch
-    then "sha256-/ok0mYmKwYE8FccucpP/tTdZBjZ5S3/nPhMmR7V/lW8="
-    else "sha256-9PxP5zUkc5oeAI1xobQlHSIpXNlDZjw+Chmm2qCKdz4=";
+  # Target Apple Silicon (aarch64)
+  starshipTarget = "aarch64-apple-darwin";
+  starshipHash = "sha256-/ok0mYmKwYE8FccucpP/tTdZBjZ5S3/nPhMmR7V/lW8=";
+
   starshipSrc = pkgs.fetchzip {
     url = "https://github.com/starship/starship/releases/download/v${starshipVersion}/starship-${starshipTarget}.tar.gz";
     hash = starshipHash;

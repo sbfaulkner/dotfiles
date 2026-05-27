@@ -2,7 +2,10 @@
   description = "sbfaulkner's dotfiles";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-25.05-darwin";  # last x86_64-darwin release will be 26.05
+    # Track the nixpkgs repository (follow latest darwin-aware releases). Using the
+    # unpinned nixpkgs input lets us pick up darwin fixes while keeping nix-darwin
+    # and home-manager inputs in sync via inputs.nixpkgs.follows below.
+    nixpkgs.url = "github:NixOS/nixpkgs";
 
     nix-darwin = {
       url = "github:nix-darwin/nix-darwin/nix-darwin-25.05";
@@ -27,10 +30,10 @@
 
   outputs = inputs: {
 
-    # Personal machine — Intel Mac, nix-darwin + home-manager
+    # Personal machine — Apple Silicon (aarch64), nix-darwin + home-manager
     darwinConfigurations.sbfaulkner = inputs.nix-darwin.lib.darwinSystem {
       modules = [
-        { nixpkgs.hostPlatform = "x86_64-darwin"; }
+        { nixpkgs.hostPlatform = "aarch64-darwin"; }
         ./darwin.nix
         inputs.home-manager.darwinModules.home-manager
         {
