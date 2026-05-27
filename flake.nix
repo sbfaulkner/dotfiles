@@ -27,10 +27,10 @@
 
   outputs = inputs: {
 
-    # Personal machine — Intel Mac, nix-darwin + home-manager
+    # Personal machine — Apple Silicon (aarch64), nix-darwin + home-manager
     darwinConfigurations.sbfaulkner = inputs.nix-darwin.lib.darwinSystem {
       modules = [
-        { nixpkgs.hostPlatform = "x86_64-darwin"; }
+        { nixpkgs.hostPlatform = "aarch64-darwin"; }
         ./darwin.nix
         inputs.home-manager.darwinModules.home-manager
         {

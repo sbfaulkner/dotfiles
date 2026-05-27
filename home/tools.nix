@@ -2,19 +2,11 @@
 
 let
   ghVersion = "2.92.0";
-  # Determine the system string in a robust way: prefer builtins.currentSystem when
-  # available, otherwise fall back to pkgs.system (provided by the pkgs argument).
-  systemStr = if builtins ? currentSystem then builtins.currentSystem else pkgs.system;
-  # Detect current system (e.g. "x86_64-darwin" or "aarch64-darwin") and
-  # choose the matching release asset and pinned sha.
-  isAarch = builtins.substring 0 7 systemStr == "aarch64";
-  amdName = "macOS_amd64";
+  # Always use the macOS arm64 (Apple Silicon) gh release.
   armName = "macOS_arm64";
-  ghAssetName = if isAarch then "gh_${ghVersion}_${armName}.zip" else "gh_${ghVersion}_${amdName}.zip";
+  ghAssetName = "gh_${ghVersion}_${armName}.zip";
   ghUrl = "https://github.com/cli/cli/releases/download/v${ghVersion}/${ghAssetName}";
-  ghHash = if isAarch
-    then "sha256-4rVFCcMMaVwsg1yJxZKs5GWdEqculWamP0zWjjf9wXk="
-    else "sha256-FfnabysqjqK6XUCOFm8EL2IVHqrv5tt6ptscoan3YM0=";
+  ghHash = "sha256-4rVFCcMMaVwsg1yJxZKs5GWdEqculWamP0zWjjf9wXk=";
   ghSrc = pkgs.fetchzip {
     url = ghUrl;
     hash = ghHash;

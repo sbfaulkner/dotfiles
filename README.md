@@ -31,7 +31,7 @@ hosts/
 
 | Target | Platform | How |
 |---|---|---|
-| `darwinConfigurations.sbfaulkner` | x86_64-darwin (Intel Mac) | Full nix-darwin + home-manager |
+| `darwinConfigurations.sbfaulkner` | aarch64-darwin (Apple Silicon) | Full nix-darwin + home-manager |
 | `homeConfigurations.work` | aarch64-darwin (Apple Silicon) | Standalone home-manager only (system managed externally) |
 
 The work config (`hosts/work.nix`) disables direnv and packages (provided by the work toolchain) and adds work-specific shell aliases and PATH entries via `isWork`.
@@ -53,15 +53,11 @@ xcode-select --install
 
 **2. Install Nix**
 
-Official installer (required for x86_64 — Determinate dropped support):
-```bash
-sh <(curl -L https://nixos.org/nix/install)
-```
-
-Or Determinate installer (Apple Silicon only):
+Determinate installer (recommended for Apple Silicon):
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
 ```
+
 
 **3. Bootstrap nix-darwin** (fetches the flake directly from GitHub — no clone needed)
 ```bash
@@ -95,7 +91,7 @@ Project-specific dev environments live in each repo as `flake.nix` + `.envrc` an
 
 | Decision | Reason |
 |---|---|
-| Official Nix installer over Determinate | Determinate dropped x86_64-darwin support |
+| Determinate installer preferred | Better support for Apple Silicon installs |
 | pnpm over npm | Consistent with work setup |
 | `cleanup = "uninstall"` for Homebrew | Migration complete enough to be strict |
 | `allowUnfreePredicate` over `allowUnfree = true` | Only permits explicitly approved packages |
