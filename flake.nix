@@ -5,15 +5,15 @@
     # Track the nixpkgs repository (follow latest darwin-aware releases). Using the
     # unpinned nixpkgs input lets us pick up darwin fixes while keeping nix-darwin
     # and home-manager inputs in sync via inputs.nixpkgs.follows below.
-    nixpkgs.url = "github:NixOS/nixpkgs";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
     nix-darwin = {
-      url = "github:nix-darwin/nix-darwin/nix-darwin-25.05";
+      url = "github:nix-darwin/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     home-manager = {
-      url = "github:nix-community/home-manager/release-25.05";
+      url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
