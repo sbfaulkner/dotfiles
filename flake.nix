@@ -2,9 +2,9 @@
   description = "sbfaulkner's dotfiles";
 
   inputs = {
-    # Track the nixpkgs repository (follow latest darwin-aware releases). Using the
-    # unpinned nixpkgs input lets us pick up darwin fixes while keeping nix-darwin
-    # and home-manager inputs in sync via inputs.nixpkgs.follows below.
+    # Track nixpkgs-unstable for current darwin fixes while flake.lock pins
+    # exact revisions. Keep nix-darwin and home-manager inputs in sync via
+    # inputs.nixpkgs.follows below.
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
     nix-darwin = {
@@ -41,9 +41,9 @@
           home-manager.useUserPackages = true;
           home-manager.backupFileExtension = "bak";
           home-manager.sharedModules = [
+            ./hosts/personal.nix
             inputs._1password-shell-plugins.hmModules.default
             inputs.try-cli.homeModules.default
-            { _module.args.isWork = false; }
           ];
           home-manager.users.sbfaulkner = import ./home;
         }
@@ -58,7 +58,6 @@
         ./hosts/work.nix
         inputs._1password-shell-plugins.hmModules.default
         inputs.try-cli.homeModules.default
-        { _module.args.isWork = true; }
       ];
     };
 

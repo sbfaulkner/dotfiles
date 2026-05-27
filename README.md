@@ -13,7 +13,9 @@ home/
   shell.nix      # zsh, starship, aliases, direnv, 1Password plugins
   git.nix        # git settings and global ignores
 hosts/
+  personal.nix   # personal-machine home-manager overrides
   work.nix       # work-specific overrides for standalone home-manager
+  work-shell.nix # work-specific zsh aliases, PATH, and init
 ```
 
 ## What's Managed
@@ -34,7 +36,7 @@ hosts/
 | `darwinConfigurations.sbfaulkner` | aarch64-darwin (Apple Silicon) | Full nix-darwin + home-manager |
 | `homeConfigurations.work` | aarch64-darwin (Apple Silicon) | Standalone home-manager only (system managed externally) |
 
-The work config (`hosts/work.nix`) disables direnv and packages (provided by the work toolchain) and adds work-specific shell aliases and PATH entries via `isWork`.
+The shared home-manager config stays in `home/`. Host-specific home-manager overrides live in `hosts/`: `hosts/personal.nix` adds the personal `reflake` command, and `hosts/work.nix` imports `hosts/work-shell.nix` for work aliases, PATH entries, and shell initialization.
 
 ## Applying Changes
 
@@ -99,4 +101,4 @@ Project-specific dev environments live in each repo as `flake.nix` + `.envrc` an
 | `pi` not in Nix (yet) | Updates too frequently; pnpm global is pragmatic for now |
 | `forAllSystems` in project flakes | Portable to Apple Silicon work machine |
 | Global gitignore for `.direnv/` | Managed by Nix; no need to add per-project |
-| nixpkgs (tracking) | Track nixpkgs and let nix-darwin / home-manager follow it for darwin-specific fixes |
+| nixpkgs-unstable tracking branch | Track current Darwin fixes while `flake.lock` pins exact revisions |
