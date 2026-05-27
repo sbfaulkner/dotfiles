@@ -324,12 +324,18 @@ nix_cmd() {
   nix --extra-experimental-features 'nix-command flakes' "$@"
 }
 
+nix_cmd_as_root() {
+  local nix_bin
+  nix_bin="$(command -v nix)" || die "Nix is not available."
+  sudo "$nix_bin" --extra-experimental-features 'nix-command flakes' "$@"
+}
+
 bootstrap_nix_darwin() {
   source_nix_profile
   command -v nix >/dev/null 2>&1 || die "Nix is not available."
 
   log "Bootstrapping nix-darwin from $PERSONAL_FLAKE"
-  nix_cmd run "$NIX_DARWIN_RUNNER" -- switch --flake "$PERSONAL_FLAKE"
+  nix_cmd_as_root run "$NIX_DARWIN_RUNNER" -- switch --flake "$PERSONAL_FLAKE"
 }
 
 bootstrap_home_manager_work() {
