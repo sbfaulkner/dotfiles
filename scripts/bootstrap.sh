@@ -327,7 +327,7 @@ nix_cmd() {
 nix_cmd_as_root() {
   local nix_bin
   nix_bin="$(command -v nix)" || die "Nix is not available."
-  sudo "$nix_bin" --extra-experimental-features 'nix-command flakes' "$@"
+  sudo -H "$nix_bin" --extra-experimental-features 'nix-command flakes' "$@"
 }
 
 bootstrap_nix_darwin() {
