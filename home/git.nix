@@ -1,13 +1,10 @@
-{ pkgs, ... }:
+{ ... }:
 
 {
   programs.git = {
     enable = true;
 
-    userName = "S. Brent Faulkner";
-    userEmail = "sbfaulkner@gmail.com";
-
-    extraConfig = {
+    settings = {
       core.editor = "code --wait";
       init.defaultBranch = "main";
       pull.rebase = true;

@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ ... }:
 
 {
   imports = [
@@ -10,6 +10,11 @@
   # Suppress unread Home Manager news notices during rebuilds.
   # News remains available manually via `home-manager news`.
   news.display = "silent";
+
+  # We intentionally track nixpkgs-unstable with home-manager master for current
+  # Darwin fixes; flake.lock pins exact revisions, so suppress the release-number
+  # mismatch warning during rebuilds.
+  home.enableNixpkgsReleaseCheck = false;
 
   # Required: tells home-manager who you are and where you live.
   home.username = "sbfaulkner";
