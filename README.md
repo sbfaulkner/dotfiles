@@ -16,6 +16,8 @@ hosts/
   personal.nix   # personal-machine home-manager overrides
   work.nix       # work-specific overrides for standalone home-manager
   work-shell.nix # work-specific zsh aliases, PATH, and init
+scripts/
+  bootstrap.sh    # clean personal/work bootstrap/retry script
 ```
 
 ## What's Managed
@@ -48,7 +50,50 @@ reflake
 
 ## Bootstrap (new machine)
 
-**1. Install Xcode Command Line Tools** (required by the Nix installer)
+Recommended bootstrap entry point for any Apple Silicon Mac:
+
+```bash
+script="$(mktemp)"
+curl --proto '=https' --tlsv1.2 -fsSL \
+  https://raw.githubusercontent.com/sbfaulkner/dotfiles/main/scripts/bootstrap.sh \
+  -o "$script"
+bash "$script"
+rm -f "$script"
+```
+
+If `--target` is omitted, the script asks whether to bootstrap `personal` or
+`work`.
+
+For a clean retry on a personal Mac, run the personal target explicitly:
+
+```bash
+script="$(mktemp)"
+curl --proto '=https' --tlsv1.2 -fsSL \
+  https://raw.githubusercontent.com/sbfaulkner/dotfiles/main/scripts/bootstrap.sh \
+  -o "$script"
+bash "$script" --target personal
+rm -f "$script"
+```
+
+The personal target checks prerequisites, offers to uninstall an existing
+Determinate Nix install via `/nix/nix-installer uninstall`, installs Determinate
+Nix, installs Homebrew if needed, runs nix-darwin from the GitHub flake, and
+clones this repo to `~/src/github.com/sbfaulkner/dotfiles`.
+
+For a non-interactive personal run, pass both `--target personal` and `--yes`:
+
+```bash
+script="$(mktemp)"
+curl --proto '=https' --tlsv1.2 -fsSL \
+  https://raw.githubusercontent.com/sbfaulkner/dotfiles/main/scripts/bootstrap.sh \
+  -o "$script"
+bash "$script" --target personal --yes
+rm -f "$script"
+```
+
+Manual personal equivalent:
+
+**1. Install Xcode Command Line Tools** (required by the Nix installer and `git`)
 ```bash
 xcode-select --install
 ```
@@ -60,30 +105,45 @@ Determinate installer (recommended for Apple Silicon):
 curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
 ```
 
-
-**3. Bootstrap nix-darwin** (fetches the flake directly from GitHub — no clone needed)
+**3. Install Homebrew** (required by the nix-darwin Homebrew module)
 ```bash
-nix run nix-darwin -- switch --flake github:sbfaulkner/dotfiles#sbfaulkner
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
-**4. Clone dotfiles** (for making future edits)
+**4. Bootstrap nix-darwin** (fetches the flake directly from GitHub — no clone needed)
+```bash
+nix --extra-experimental-features 'nix-command flakes' run github:nix-darwin/nix-darwin/master#darwin-rebuild -- switch --flake github:sbfaulkner/dotfiles#sbfaulkner
+```
+
+**5. Clone dotfiles** (for making future edits)
 ```bash
 mkdir -p ~/src/github.com/sbfaulkner
-git clone https://github.com/sbfaulkner/dotfiles ~/src/github.com/sbfaulkner/dotfiles
+git clone https://github.com/sbfaulkner/dotfiles.git ~/src/github.com/sbfaulkner/dotfiles
 ```
 
-After that, use `reflake` for all subsequent changes.
+After that, open a new terminal and use `reflake` for all subsequent changes.
 
 ### Work machine
 
 On a machine where Nix is already installed but the system layer is managed
-externally, use standalone home-manager. Skip steps 1–2, then:
+externally, use standalone home-manager:
 
 ```bash
-nix run home-manager -- switch --flake github:sbfaulkner/dotfiles#work
+script="$(mktemp)"
+curl --proto '=https' --tlsv1.2 -fsSL \
+  https://raw.githubusercontent.com/sbfaulkner/dotfiles/main/scripts/bootstrap.sh \
+  -o "$script"
+bash "$script" --target work
+rm -f "$script"
 ```
 
-Clone the repo afterward for local edits.
+Manual work equivalent:
+
+```bash
+nix --extra-experimental-features 'nix-command flakes' run github:nix-community/home-manager/master -- switch --flake github:sbfaulkner/dotfiles#work
+```
+
+Clone the repo afterward for local edits if you use the manual command.
 
 ## Per-Project Flakes
 
