@@ -112,7 +112,7 @@ curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix 
 
 **4. Bootstrap nix-darwin** (fetches the flake directly from GitHub — no clone needed)
 ```bash
-nix --extra-experimental-features 'nix-command flakes' run github:nix-darwin/nix-darwin/master#darwin-rebuild -- switch --flake github:sbfaulkner/dotfiles#sbfaulkner
+sudo /nix/var/nix/profiles/default/bin/nix --extra-experimental-features 'nix-command flakes' run github:nix-darwin/nix-darwin/master#darwin-rebuild -- switch --flake github:sbfaulkner/dotfiles#sbfaulkner
 ```
 
 **5. Clone dotfiles** (for making future edits)
