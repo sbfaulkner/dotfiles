@@ -102,3 +102,4 @@ Project-specific dev environments live in each repo as `flake.nix` + `.envrc` an
 | `forAllSystems` in project flakes | Portable to Apple Silicon work machine |
 | Global gitignore for `.direnv/` | Managed by Nix; no need to add per-project |
 | nixpkgs-unstable tracking branch | Track current Darwin fixes while `flake.lock` pins exact revisions |
+| Home Manager release check disabled | Intentional `nixpkgs-unstable` + `home-manager/master` pairing can report different release numbers |
