@@ -4,6 +4,7 @@
   imports = [
     ./ghostty.nix
     ./git.nix
+    ./pi.nix
     ./shell.nix
     ./tools.nix
   ];

@@ -12,4 +12,10 @@
     name = "S. Brent Faulkner";
     email = "sbfaulkner@gmail.com";
   };
+
+  # Pi — personal model/provider defaults.
+  programs.pi.settings = {
+    defaultProvider = "github-copilot";
+    defaultModel = "gpt-5-mini";
+  };
 }
