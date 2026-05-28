@@ -13,6 +13,7 @@ home/
   tools.nix      # user packages
   shell.nix      # zsh, starship, aliases, direnv, 1Password plugins
   git.nix        # git settings and global ignores
+  pi.nix         # pi coding agent config (seed settings, clone pi-extensions)
 hosts/
   personal.nix   # personal-machine home-manager overrides
   work.nix       # work-specific overrides for standalone home-manager
@@ -163,6 +164,25 @@ the app install to the external work setup.
 On activation, Home Manager backs up legacy macOS-specific Ghostty config files
 from `~/Library/Application Support/com.mitchellh.ghostty/` to
 `*.before-home-manager` so they cannot override the managed XDG config.
+
+## Pi Coding Agent
+
+Pi configuration is managed by `home/pi.nix`:
+
+- **Seed-only `settings.json`** — on first activation (or after deleting the
+  file), home-manager writes `~/.pi/agent/settings.json` with shared defaults
+  (theme, npmCommand, built-in extension/skill toggles) merged with host-specific
+  model/provider settings. Subsequent `reflake` runs leave the file untouched so
+  pi’s own runtime changes are preserved.
+- **`pi-extensions` clone** — ensures
+  `~/src/github.com/sbfaulkner/pi-extensions` is cloned and registered as a
+  package source. If the repo is already present, it is left as-is.
+- **Extra packages (work only)** — `hosts/work.nix` uses `pi install` to add
+  git-hosted packages (shop-pi-fy, pi-autoresearch, pi-usage-awareness) that
+  clone into `~/.pi/agent/git/`.
+
+To regenerate settings from scratch, delete `~/.pi/agent/settings.json` and run
+`reflake`.
 
 ## Secrets
 
