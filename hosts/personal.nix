@@ -1,7 +1,11 @@
 # hosts/personal.nix — personal-machine home-manager overrides
-{ ... }:
+{ pkgs, ... }:
 
 {
+  home.packages = [
+    (pkgs.callPackage ../pkgs/pi-coding-agent.nix { })
+  ];
+
   programs.zsh.shellAliases.reflake = "sudo darwin-rebuild switch --flake ~/src/github.com/sbfaulkner/dotfiles#sbfaulkner";
 
   programs.git.settings.user = {
