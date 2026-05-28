@@ -1,4 +1,4 @@
-{ lib, ... }:
+{ lib, pkgs, ... }:
 
 {
   programs.zsh = {
@@ -37,21 +37,50 @@
 
       # secrets — load ejson secrets into env
       secrets() {
-        local EJSON="$HOME/.secrets.d/''${1:-secrets}.ejson"
+        local EJSON="''${XDG_CONFIG_HOME:-$HOME/.config}/secrets/''${1:-default}.ejson"
+
         if [ -f "$EJSON" ]; then
           echo "Loading secrets: $EJSON"
           eval "$(ejson2env "$EJSON")"
         else
           echo "Secrets file not found: $EJSON"
+          return 1
         fi
       }
 
-      # load default secrets at shell startup (only if the secrets file exists)
-      if [ -f "$HOME/.secrets.d/secrets.ejson" ]; then
+      # load default secrets at shell startup (only if the file exists)
+      if [ -f "''${XDG_CONFIG_HOME:-$HOME/.config}/secrets/default.ejson" ]; then
         secrets
       fi
     '';
   };
+
+  # Seed an empty default secrets file on new machines. Existing secrets are
+  # never overwritten; populated secret values are restored out-of-band.
+  home.activation.seedDefaultEjsonSecrets = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    secrets_dir="''${XDG_CONFIG_HOME:-$HOME/.config}/secrets"
+    default_ejson="$secrets_dir/default.ejson"
+    keydir="/opt/ejson/keys"
+
+    if [ ! -f "$default_ejson" ]; then
+      if [ ! -d "$keydir" ] || [ ! -w "$keydir" ]; then
+        echo "Cannot seed $default_ejson because $keydir is not writable." >&2
+        exit 1
+      fi
+
+      run mkdir -p "$secrets_dir"
+      public_key="$(${pkgs.ejson}/bin/ejson keygen --write)" || exit 1
+
+      cat > "$default_ejson" <<SECRETS_EOF
+{
+  "_public_key": "$public_key",
+  "environment": {}
+}
+SECRETS_EOF
+
+      verboseEcho "Seeded empty ejson secrets file at $default_ejson"
+    fi
+  '';
 
   # PATH additions
   home.sessionPath = [

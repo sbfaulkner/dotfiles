@@ -190,20 +190,30 @@ Encrypted secrets are managed via [ejson](https://github.com/Shopify/ejson) and
 [ejson2env](https://github.com/Shopify/ejson2env), both installed by
 `home/tools.nix`.
 
-`home/shell.nix` provides a `secrets` shell function that decrypts an ejson file
-and exports the values as environment variables:
+`home/shell.nix` provides a small `secrets` shell function that decrypts an
+ejson file and exports the values as environment variables. Encrypted secret
+files live under XDG config; private keys stay in ejson's standard keydir:
+
+| Purpose | Default path |
+|---|---|
+| Encrypted ejson files | `${XDG_CONFIG_HOME:-$HOME/.config}/secrets` |
+| EJSON private keys | `/opt/ejson/keys` |
+
+The managed shell intentionally leaves `EJSON_KEYDIR` unset so ejson/ejson2env
+use their standard keydir.
 
 ```bash
-secrets              # loads ~/.secrets.d/secrets.ejson (default)
-secrets myfile       # loads ~/.secrets.d/myfile.ejson
+secrets              # loads ${XDG_CONFIG_HOME:-$HOME/.config}/secrets/default.ejson
+secrets myfile       # loads ${XDG_CONFIG_HOME:-$HOME/.config}/secrets/myfile.ejson
 ```
 
-If `~/.secrets.d/secrets.ejson` exists, it is loaded automatically at shell
-startup so common secrets (API tokens, etc.) are always available.
+If `default.ejson` exists, it is loaded automatically at shell startup so common
+secrets (API tokens, etc.) are always available.
 
-> **New machine note:** the bootstrap script does not provision
-> `~/.secrets.d/` — copy your ejson keyring and secret files from a
-> trusted source after bootstrapping.
+On activation, Home Manager seeds an empty `default.ejson` with a new ejson
+keypair if the file is missing. Existing files are never overwritten. This repo
+does not provision secret values; restore populated secrets and any matching
+private keys from a trusted source on new machines.
 
 ## Git Identity
 

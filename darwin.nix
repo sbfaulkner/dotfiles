@@ -30,6 +30,14 @@
   # Tell nix-darwin about the user so home-manager can find the home directory.
   users.users.sbfaulkner.home = "/Users/sbfaulkner";
 
+  # Keep ejson private keys in ejson's standard keydir. Make it writable by the
+  # primary user so `ejson keygen --write` works for shell-managed secrets.
+  system.activationScripts.extraActivation.text = lib.mkAfter ''
+    mkdir -p /opt/ejson/keys
+    chown sbfaulkner:staff /opt/ejson/keys
+    chmod 0755 /opt/ejson/keys
+  '';
+
   # The stateVersion marks when this config was first created.
   # Set it once on first install and never change it.
   system.stateVersion = 5;
