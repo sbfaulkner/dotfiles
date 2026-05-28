@@ -27,8 +27,10 @@ in
     fd         # fast alternative to find
     # Use pinned GitHub CLI release instead of the nixpkgs-provided package
     ghBin
+    jq         # JSON query/filter CLI
     nodejs     # javascript runtime
     pnpm       # fast, disk-efficient package manager (used at work too)
+    ripgrep    # fast recursive grep (rg)
   ];
 
   # direnv + nix-direnv: automatically activate per-project flake dev shells
