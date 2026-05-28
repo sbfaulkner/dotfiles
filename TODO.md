@@ -9,5 +9,6 @@
 - [ ] Auto-update strategy: decide whether `reflake` should pull from the remote flake (no local clone needed) or from a local checkout; consider periodic auto-refresh (e.g. on new interactive shell, like oh-my-zsh did) — options include a zsh hook that checks staleness, a launchd timer, or just prompting when the local checkout is behind origin
 - [ ] Manage pi config (`~/.pi/`) via home-manager — extensions, skills, and settings need host-specific branching (work vs home have different extensions/skills available); ties into nixifying the pi installation itself
 - [ ] Evaluate using Determinate's nix-darwin module/input once the personal bootstrap is stable — likely cleaner than bare `nix.enable = false`, but add it in a focused PR after confirming ownership of the Nix daemon, `/etc/nix/nix.conf`, flake registry/settings, and compatibility with current `nix-darwin`/`home-manager` inputs
+- [ ] Provision `~/.secrets.d/` on new machines — the bootstrap script does not handle ejson keyring or secret files; document or automate copying from a trusted source (1Password, airdrop, etc.)
 - [ ] Audit remaining dotfiles on both machines for candidates to bring under Nix management (e.g. `~/.config/` dirs, `.ssh/config`, starship config, VS Code settings)
 
