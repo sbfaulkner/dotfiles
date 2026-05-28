@@ -17,6 +17,8 @@ hosts/
   personal.nix   # personal-machine home-manager overrides
   work.nix       # work-specific overrides for standalone home-manager
   work-shell.nix # work-specific zsh aliases, PATH, and init
+pkgs/
+  pi-coding-agent.nix # placeholder local Pi package
 scripts/
   bootstrap.sh    # clean personal/work bootstrap/retry script
 ```
