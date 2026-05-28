@@ -1,50 +1,50 @@
-{ bash, lib, nodejs_22, stdenvNoCC }:
+{
+  fd,
+  fetchurl,
+  gitMinimal,
+  lib,
+  makeWrapper,
+  openssh,
+  ripgrep,
+  stdenvNoCC,
+}:
 
-stdenvNoCC.mkDerivation {
+let
+  runtimePath = lib.makeBinPath [
+    fd
+    gitMinimal
+    openssh
+    ripgrep
+  ];
+in
+stdenvNoCC.mkDerivation rec {
   pname = "pi-coding-agent";
-  version = "placeholder";
+  version = "0.76.0";
 
-  dontUnpack = true;
+  src = fetchurl {
+    url = "https://github.com/earendil-works/pi/releases/download/v${version}/pi-darwin-arm64.tar.gz";
+    hash = "sha256-byG7DGNSdWjYB9euLbaIb/fSdSRnNnUQDGhP/Jlq/OU=";
+  };
+
+  sourceRoot = "pi";
+
+  nativeBuildInputs = [ makeWrapper ];
 
   installPhase = ''
     runHook preInstall
 
-    mkdir -p "$out/bin" "$out/share/pi-coding-agent"
+    mkdir -p "$out/bin" "$out/lib/pi"
+    cp -R . "$out/lib/pi/"
 
-    cat > "$out/share/pi-coding-agent/placeholder.js" <<'EOF'
-const arg = process.argv[2] ?? "";
-
-switch (arg) {
-  case "--version":
-  case "-v":
-  case "version":
-    console.log("pi-coding-agent placeholder");
-    break;
-  case "--node-version":
-    console.log(process.version);
-    break;
-  case "--node-path":
-    console.log(process.execPath);
-    break;
-  default:
-    console.log("pi-coding-agent placeholder");
-    console.error("This package verifies dotfiles flake wiring and its package-private Node runtime; it does not run Pi yet.");
-    break;
-}
-EOF
-
-    cat > "$out/bin/pi" <<EOF
-#!${bash}/bin/bash
-set -euo pipefail
-exec ${nodejs_22}/bin/node "$out/share/pi-coding-agent/placeholder.js" "\$@"
-EOF
-    chmod +x "$out/bin/pi"
+    makeWrapper "$out/lib/pi/pi" "$out/bin/pi" \
+      --set PI_PACKAGE_DIR "$out/lib/pi" \
+      --suffix PATH : "${runtimePath}"
 
     runHook postInstall
   '';
 
   meta = {
-    description = "Placeholder package for the Pi coding agent";
+    description = "Pi coding agent CLI";
     homepage = "https://pi.dev";
     license = lib.licenses.mit;
     mainProgram = "pi";
