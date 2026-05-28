@@ -164,6 +164,37 @@ On activation, Home Manager backs up legacy macOS-specific Ghostty config files
 from `~/Library/Application Support/com.mitchellh.ghostty/` to
 `*.before-home-manager` so they cannot override the managed XDG config.
 
+## Secrets
+
+Encrypted secrets are managed via [ejson](https://github.com/Shopify/ejson) and
+[ejson2env](https://github.com/Shopify/ejson2env), both installed by
+`home/tools.nix`.
+
+`home/shell.nix` provides a `secrets` shell function that decrypts an ejson file
+and exports the values as environment variables:
+
+```bash
+secrets              # loads ~/.secrets.d/secrets.ejson (default)
+secrets myfile       # loads ~/.secrets.d/myfile.ejson
+```
+
+If `~/.secrets.d/secrets.ejson` exists, it is loaded automatically at shell
+startup so common secrets (API tokens, etc.) are always available.
+
+> **New machine note:** the bootstrap script does not provision
+> `~/.secrets.d/` — copy your ejson keyring and secret files from a
+> trusted source after bootstrapping.
+
+## Git Identity
+
+Git user identity is host-specific. The personal machine sets `user.name` and
+`user.email` in `hosts/personal.nix`. The work configuration intentionally omits
+a `[user]` section from `~/.config/git/config` so the work toolchain's own
+identity management takes precedence.
+
+Shared git settings (editor, default branch, pull strategy, global ignores) live
+in `home/git.nix` and apply to both configurations.
+
 ## Per-Project Flakes
 
 Project-specific dev environments live in each repo as `flake.nix` + `.envrc` and are activated automatically by `direnv` on `cd`. The flake provides the language runtime and any native library dependencies; the project's own tooling (e.g. Bundler, Go modules) manages the rest.
@@ -178,7 +209,7 @@ Project-specific dev environments live in each repo as `flake.nix` + `.envrc` an
 | `cleanup = "uninstall"` for Homebrew | Migration complete enough to be strict |
 | `allowUnfreePredicate` over `allowUnfree = true` | Only permits explicitly approved packages |
 | `try` via `tobi/try-cli` flake | Repo has its own flake with a home-manager module |
-| `pi` managed by local Nix package on personal machines | Uses the official Darwin arm64 release tarball; work machines keep using TEC-provided `pi` |
+| `pi` managed by local Nix package on personal machines | Wraps the official Darwin arm64 release tarball with runtime deps (`fd`, `git`, `ssh`, `rg`); version pinned in `pkgs/pi-coding-agent.nix`; work machines keep using TEC-provided `pi` |
 | Ghostty config uses XDG path | Shared across personal and work; legacy macOS config is backed up so it cannot override XDG |
 | `forAllSystems` in project flakes | Portable to Apple Silicon work machine |
 | Global gitignore for `.direnv/` | Managed by Nix; no need to add per-project |
