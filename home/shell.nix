@@ -6,6 +6,16 @@
 
     defaultKeymap = "viins";
 
+    history = {
+      size = 10000;          # HISTSIZE — lines kept in memory
+      save = 10000;          # SAVEHIST — lines written to file
+      ignoreDups = true;     # setopt HIST_IGNORE_DUPS — skip consecutive dupes
+      ignoreAllDups = true;  # setopt HIST_IGNORE_ALL_DUPS — remove older dupe
+      ignoreSpace = true;    # setopt HIST_IGNORE_SPACE — space-prefixed cmds stay private
+      share = true;          # setopt SHARE_HISTORY — sync across sessions
+      extended = true;       # setopt EXTENDED_HISTORY — timestamps in history file
+    };
+
     shellAliases = {
       a = "alias";
       h = "history";

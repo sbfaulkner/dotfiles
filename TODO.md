@@ -5,7 +5,7 @@
 - [ ] Add more per-project flakes as needed (other repos in `~/src`)
 - [ ] Re-enable 1Password `gh` plugin (`home/shell.nix`) — disabled because it causes pi sessions to hang; likely the 1Password agent socket (`~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock`) isn't available in pi's spawned shell — check if setting `SSH_AUTH_SOCK` or `OP_PLUGIN_ALIASES_SOURCED` in pi's env helps
 - [x] ~~Add `ripgrep` and `jq` to `home/tools.nix`~~ — done; `rg` is also bundled in the `pi` wrapper for its own use
-- [ ] Configure `programs.zsh.history` — size, deduplication, share across sessions
+- [x] ~~Configure `programs.zsh.history` — size, deduplication, share across sessions~~ — done; 10k lines, dedup, shared across sessions, extended timestamps
 - [ ] Auto-update strategy: decide whether `reflake` should pull from the remote flake (no local clone needed) or from a local checkout; consider periodic auto-refresh (e.g. on new interactive shell, like oh-my-zsh did) — options include a zsh hook that checks staleness, a launchd timer, or just prompting when the local checkout is behind origin
 - [ ] Manage pi config (`~/.pi/`) via home-manager — extensions, skills, and settings need host-specific branching (work vs home have different extensions/skills available); ties into nixifying the pi installation itself
 - [ ] Evaluate using Determinate's nix-darwin module/input once the personal bootstrap is stable — likely cleaner than bare `nix.enable = false`, but add it in a focused PR after confirming ownership of the Nix daemon, `/etc/nix/nix.conf`, flake registry/settings, and compatibility with current `nix-darwin`/`home-manager` inputs
