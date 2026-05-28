@@ -178,7 +178,7 @@ Project-specific dev environments live in each repo as `flake.nix` + `.envrc` an
 | `cleanup = "uninstall"` for Homebrew | Migration complete enough to be strict |
 | `allowUnfreePredicate` over `allowUnfree = true` | Only permits explicitly approved packages |
 | `try` via `tobi/try-cli` flake | Repo has its own flake with a home-manager module |
-| `pi` not in Nix (yet) | Updates too frequently; pnpm global is pragmatic for now |
+| `pi` managed by local Nix package on personal machines | Uses the official Darwin arm64 release tarball; work machines keep using TEC-provided `pi` |
 | Ghostty config uses XDG path | Shared across personal and work; legacy macOS config is backed up so it cannot override XDG |
 | `forAllSystems` in project flakes | Portable to Apple Silicon work machine |
 | Global gitignore for `.direnv/` | Managed by Nix; no need to add per-project |

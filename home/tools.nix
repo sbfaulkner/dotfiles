@@ -39,14 +39,14 @@ in
   };
 
   # Set pnpm's global package directory.
-  # Global binaries (e.g. pi) land directly in $PNPM_HOME.
+  # Global binaries installed with `pnpm add -g` land directly in $PNPM_HOME.
   home.sessionVariables = {
     EDITOR = "code --wait";
     LESS = "-RF";
     PNPM_HOME = "$HOME/.local/share/pnpm";
   };
 
-  # Add pnpm global bin to PATH so installed tools (e.g. pi) are found.
+  # Add pnpm global bin to PATH so pnpm-installed tools are found.
   home.sessionPath = [
     "$HOME/.local/share/pnpm"
   ];
