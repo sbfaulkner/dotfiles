@@ -30,6 +30,16 @@
 
   outputs = inputs: {
 
+    packages.aarch64-darwin =
+      let
+        pkgs = inputs.nixpkgs.legacyPackages."aarch64-darwin";
+        piCodingAgent = pkgs.callPackage ./pkgs/pi-coding-agent.nix { };
+      in
+      {
+        pi-coding-agent = piCodingAgent;
+        default = piCodingAgent;
+      };
+
     # Personal machine — Apple Silicon (aarch64), nix-darwin + home-manager
     darwinConfigurations.sbfaulkner = inputs.nix-darwin.lib.darwinSystem {
       modules = [
