@@ -56,14 +56,16 @@ Personal flow:
   2. If Nix is already present, offer to uninstall it with /nix/nix-installer.
   3. Install Determinate Nix.
   4. Install Homebrew if /opt/homebrew/bin/brew is missing.
-  5. Run nix-darwin with github:sbfaulkner/dotfiles#sbfaulkner.
-  6. Clone or update ~/src/github.com/sbfaulkner/dotfiles.
+  5. Prepare /opt/ejson/keys for the current user.
+  6. Run nix-darwin with github:sbfaulkner/dotfiles#sbfaulkner.
+  7. Clone or update ~/src/github.com/sbfaulkner/dotfiles.
 
 Work flow:
   1. Verify macOS + native arm64 shell + Xcode Command Line Tools.
-  2. Require an existing Nix installation.
-  3. Run standalone home-manager with github:sbfaulkner/dotfiles#work.
-  4. Clone or update ~/src/github.com/sbfaulkner/dotfiles.
+  2. Prepare /opt/ejson/keys for the current user.
+  3. Require an existing Nix installation.
+  4. Run standalone home-manager with github:sbfaulkner/dotfiles#work.
+  5. Clone or update ~/src/github.com/sbfaulkner/dotfiles.
 EOF
 }
 
@@ -330,6 +332,15 @@ nix_cmd_as_root() {
   sudo -H "$nix_bin" --extra-experimental-features 'nix-command flakes' "$@"
 }
 
+ensure_ejson_keydir() {
+  local keydir="/opt/ejson/keys"
+
+  log "Preparing ejson keydir at $keydir"
+  sudo mkdir -p "$keydir"
+  sudo chown "$USER":staff "$keydir"
+  sudo chmod 0755 "$keydir"
+}
+
 bootstrap_nix_darwin() {
   source_nix_profile
   command -v nix >/dev/null 2>&1 || die "Nix is not available."
@@ -376,6 +387,7 @@ bootstrap_personal() {
 
   install_determinate_nix
   ensure_homebrew
+  ensure_ejson_keydir
   bootstrap_nix_darwin
   clone_dotfiles
 }
@@ -389,6 +401,7 @@ bootstrap_work() {
     warn "--skip-uninstall is ignored for --target work."
   fi
 
+  ensure_ejson_keydir
   bootstrap_home_manager_work
   clone_dotfiles
 }
@@ -402,7 +415,8 @@ Recommended next steps:
   1. Open a new terminal so zsh/Home Manager environment changes are loaded.
   2. Confirm the checkout is present:
        cd "$DOTFILES_DIR"
-  3. For future updates, run:
+  3. Restore shell secrets from a trusted source as needed; see README's Secrets section.
+  4. For future updates, run:
        reflake
 EOF
 
