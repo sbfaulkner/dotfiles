@@ -191,13 +191,16 @@ Home Manager installs a small `LESSOPEN` filter at
 
 | File type | Renderer |
 |---|---|
-| Markdown (`*.md`, `*.markdown`) | `glow` |
+| Markdown (`*.md`, `*.markdown`) | pinned `glow` 1.5.1 |
 | JSON (`*.json`) | `jq -C .` |
 | YAML (`*.yaml`, `*.yml`) | `yq -C -P` |
 
 The managed `LESS=-RFX` keeps ANSI colors enabled, quits automatically for
 one-screen output, and leaves viewed content in terminal scrollback after exit.
-Unsupported files fall back to normal `less` behavior.
+Unsupported files fall back to normal `less` behavior. Markdown previews
+intentionally use Glow 1.5.1 from a pinned older nixpkgs input because Glow 2.x
+currently emits ANSI sequences that `less -R` does not preserve reliably via
+`LESSOPEN`.
 
 ## Secrets
 

@@ -18,6 +18,16 @@ let
     cp ${ghSrc}/bin/gh $out/bin/gh
     chmod +x $out/bin/gh
   '';
+
+  lessfilter = pkgs.writeShellApplication {
+    name = "lessfilter";
+    runtimeInputs = [
+      pkgs.glow_1_5_1
+      pkgs.jq
+      pkgs.yq-go
+    ];
+    text = builtins.readFile ./dotfiles/lessfilter;
+  };
 in
 {
   home.packages = with pkgs; [
@@ -27,7 +37,7 @@ in
     fd         # fast alternative to find
     # Use pinned GitHub CLI release instead of the nixpkgs-provided package
     ghBin
-    glow       # Markdown renderer used by lessfilter
+    glow_1_5_1 # Markdown renderer used by lessfilter; keep on 1.5.1 for less(1) ANSI compatibility
     jq         # JSON query/filter CLI
     nodejs     # javascript runtime
     pnpm       # fast, disk-efficient package manager (used at work too)
@@ -53,8 +63,7 @@ in
 
   # Render common structured docs/configs before handing them to less.
   xdg.configFile."dotfiles/lessfilter" = {
-    source = ./dotfiles/lessfilter;
-    executable = true;
+    source = "${lessfilter}/bin/lessfilter";
   };
 
   # Add pnpm global bin to PATH so pnpm-installed tools are found.
