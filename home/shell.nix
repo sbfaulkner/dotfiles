@@ -36,76 +36,41 @@
       setopt rm_star_silent
 
       # secrets — load ejson secrets into env
-      # Supports: secrets [name]
-      #           secrets -e|--edit [name]   # edit plaintext and re-encrypt when saved
-      secrets() {
-        local edit=0
-        local name
-
-        while [ $# -gt 0 ]; do
-          case "$1" in
-            -e|--edit)
-              edit=1
-              shift
-              ;;
-            --)
-              shift
-              break
-              ;;
-            -*)
-              echo "Unknown option: $1" >&2
-              return 1
-              ;;
-            *)
-              name="$1"
-              shift
-              ;;
-          esac
-        done
-
+      # Simple helper + separate edit helper for clarity.
+      _secretsedit() {
+        local name="$1"
         local EJSON="''${XDG_CONFIG_HOME:-$HOME/.config}/secrets/''${name:-default}.ejson"
 
-        if [ "$edit" -eq 1 ]; then
-          if [ ! -f "$EJSON" ]; then
-            echo "Secrets file not found: $EJSON" >&2
-            return 1
-          fi
+        [ -f "$EJSON" ] || { echo "Secrets file not found: $EJSON" >&2; return 1; }
+        command -v ejson >/dev/null 2>&1 || { echo "ejson is not installed or not on PATH" >&2; return 1; }
 
-          if ! command -v ejson >/dev/null 2>&1; then
-            echo "ejson is not installed or not on PATH" >&2
-            return 1
-          fi
+        local orig tmp
+        orig="$(mktemp "${TMPDIR:-/tmp}/secrets.orig.XXXXXX")" || return 1
+        tmp="$(mktemp "${TMPDIR:-/tmp}/secrets.edit.XXXXXX")" || { rm -f "$orig"; return 1; }
+        trap 'rm -f "$orig" "$tmp"' EXIT
 
-          local orig tmp
-          orig="$(mktemp "${TMPDIR:-/tmp}/secrets.orig.XXXXXX")" || return 1
-          tmp="$(mktemp "${TMPDIR:-/tmp}/secrets.edit.XXXXXX")" || { rm -f "$orig"; return 1; }
-          trap 'rm -f "$orig" "$tmp"' EXIT
+        ejson decrypt "$EJSON" >"$orig" || { echo "Failed to decrypt $EJSON — do you have the private key in /opt/ejson/keys?" >&2; return 1; }
+        cp "$orig" "$tmp"
 
-          # Decrypt to orig (plaintext) for comparison, and copy to tmp for editing
-          if ! ejson decrypt "$EJSON" >"$orig" 2>/dev/null; then
-            echo "Failed to decrypt $EJSON — do you have the private key in /opt/ejson/keys?" >&2
-            return 1
-          fi
-          cp "$orig" "$tmp"
+        ${EDITOR:-vi} "$tmp"
 
-          ${EDITOR:-vi} "$tmp"
+        cmp -s "$orig" "$tmp" && { echo "No changes made to $EJSON"; return 0; }
 
-          if cmp -s "$orig" "$tmp"; then
-            echo "No changes made to $EJSON"
-            return 0
-          fi
+        ejson encrypt "$tmp" >/dev/null 2>&1 || { echo "Failed to re-encrypt edited secrets" >&2; return 1; }
+        mv "$tmp" "$EJSON"
+        echo "Re-encrypted secrets: $EJSON"
+        rm -f "$orig"
+      }
 
-          # Re-encrypt the edited plaintext and replace the original ejson file
-          if ejson encrypt "$tmp" >/dev/null 2>&1; then
-            mv "$tmp" "$EJSON"
-            echo "Re-encrypted secrets: $EJSON"
-            rm -f "$orig"
-            return 0
-          else
-            echo "Failed to re-encrypt edited secrets" >&2
-            return 1
-          fi
+      secrets() {
+        # quick check for -e or --edit and delegate to _secretsedit
+        if [ "$1" = "-e" ] || [ "$1" = "--edit" ]; then
+          shift
+          _secretsedit "$1"
+          return $?
         fi
+
+        local EJSON="''${XDG_CONFIG_HOME:-$HOME/.config}/secrets/''${1:-default}.ejson"
 
         if [ -f "$EJSON" ]; then
           echo "Loading secrets: $EJSON"
