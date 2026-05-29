@@ -10,8 +10,8 @@
 - [x] ~~Manage pi config (`~/.pi/`) via home-manager~~ — done; seed-only `settings.json`, pi-extensions clone, host-specific model/provider, work-only extra packages
 - [ ] Evaluate using Determinate's nix-darwin module/input once the personal bootstrap is stable — likely cleaner than bare `nix.enable = false`, but add it in a focused PR after confirming ownership of the Nix daemon, `/etc/nix/nix.conf`, flake registry/settings, and compatibility with current `nix-darwin`/`home-manager` inputs
 - [x] ~~Move encrypted ejson secret files to XDG config~~ — done; shell secrets load `${XDG_CONFIG_HOME:-$HOME/.config}/secrets/default.ejson` and ejson keys stay under ejson's default `/opt/ejson/keys`
-- [ ] Decide whether to add a documented restore workflow for populated secret values/private keys via 1Password, AirDrop, or backup restore; current setup seeds an empty default file/keypair if missing but intentionally does not sync secret material from another machine
-- [x] ~~Configure a `LESSOPEN`/`lessfilter` pipeline for rich previews in `less`~~ — done for Markdown (`glow`), JSON (`jq`), and YAML (`yq`); `LESS=-RFX`
+- [ ] Decide whether to add a documented restore workflow for populated secret values/private keys via 1Password, AirDrop, or backup restore; current setup seeds an empty default file/keypair if missing but intentionally does not sync secret material from another machine — **deprioritized for now**
+- [x] ~~Configure a `LESSOPEN`/`lessfilter` pipeline for rich previews in `less`~~ — done for Markdown (pinned `glow` 1.5.1), JSON (`jq`), and YAML (`yq`); `LESS=-RFX`; lessfilter is wrapped with pinned runtime inputs
 - [ ] Add a managed `.vimrc` / Vim config via Home Manager; first dig up prior personal Vim settings for useful defaults
 - [ ] Audit remaining dotfiles on both machines for candidates to bring under Nix management (e.g. `~/.config/` dirs, `.ssh/config`, starship config, VS Code settings)
 
