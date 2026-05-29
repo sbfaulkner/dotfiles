@@ -35,51 +35,15 @@
       unsetopt hist_verify
       setopt rm_star_silent
 
-      # secrets — load ejson secrets into env
-      # Simple helper + separate edit helper for clarity.
-      _secretsedit() {
-        local name="$1"
-        local EJSON="''${XDG_CONFIG_HOME:-$HOME/.config}/secrets/''${name:-default}.ejson"
-
-        [ -f "$EJSON" ] || { echo "Secrets file not found: $EJSON" >&2; return 1; }
-        command -v ejson >/dev/null 2>&1 || { echo "ejson is not installed or not on PATH" >&2; return 1; }
-
-        local orig tmp
-        orig="$(mktemp "${TMPDIR:-/tmp}/secrets.orig.XXXXXX")" || return 1
-        tmp="$(mktemp "${TMPDIR:-/tmp}/secrets.edit.XXXXXX")" || { rm -f "$orig"; return 1; }
-        trap 'rm -f "$orig" "$tmp"' EXIT
-
-        ejson decrypt "$EJSON" >"$orig" || { echo "Failed to decrypt $EJSON — do you have the private key in /opt/ejson/keys?" >&2; return 1; }
-        cp "$orig" "$tmp"
-
-        ${EDITOR:-vi} "$tmp"
-
-        cmp -s "$orig" "$tmp" && { echo "No changes made to $EJSON"; return 0; }
-
-        ejson encrypt "$tmp" >/dev/null 2>&1 || { echo "Failed to re-encrypt edited secrets" >&2; return 1; }
-        mv "$tmp" "$EJSON"
-        echo "Re-encrypted secrets: $EJSON"
-        rm -f "$orig"
-      }
-
-      secrets() {
-        # quick check for -e or --edit and delegate to _secretsedit
-        if [ "$1" = "-e" ] || [ "$1" = "--edit" ]; then
-          shift
-          _secretsedit "$1"
-          return $?
-        fi
-
-        local EJSON="''${XDG_CONFIG_HOME:-$HOME/.config}/secrets/''${1:-default}.ejson"
-
-        if [ -f "$EJSON" ]; then
-          echo "Loading secrets: $EJSON"
-          eval "$(ejson2env "$EJSON")"
-        else
-          echo "Secrets file not found: $EJSON"
-          return 1
-        fi
-      }
+      # Load external function files to keep this file small. If you want the
+      # editable secrets helper, place a file at
+      # ${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/functions/secrets and it will
+      # be sourced here.
+      SECRETS_FUNCTION_FILE="''${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/functions/secrets"
+      if [ -r "$SECRETS_FUNCTION_FILE" ]; then
+        # shellcheck source=/dev/null
+        source "$SECRETS_FUNCTION_FILE"
+      fi
 
       # load default secrets at shell startup (only if the file exists)
       if [ -f "''${XDG_CONFIG_HOME:-$HOME/.config}/secrets/default.ejson" ]; then
