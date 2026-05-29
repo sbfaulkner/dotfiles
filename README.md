@@ -205,6 +205,8 @@ use their standard keydir.
 ```bash
 secrets              # loads ${XDG_CONFIG_HOME:-$HOME/.config}/secrets/default.ejson
 secrets myfile       # loads ${XDG_CONFIG_HOME:-$HOME/.config}/secrets/myfile.ejson
+secrets -e           # edit ${XDG_CONFIG_HOME:-$HOME/.config}/secrets/default.ejson in $EDITOR and re-encrypt if changed
+secrets --edit myfile # edit and re-encrypt myfile.ejson
 ```
 
 If `default.ejson` exists, it is loaded automatically at shell startup so common

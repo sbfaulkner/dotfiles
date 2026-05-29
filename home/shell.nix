@@ -1,4 +1,4 @@
-{ lib, pkgs, ... }:
+{ lib, pkgs, config, ... }:
 
 {
   programs.zsh = {
@@ -35,21 +35,18 @@
       unsetopt hist_verify
       setopt rm_star_silent
 
-      # secrets — load ejson secrets into env
-      secrets() {
-        local EJSON="''${XDG_CONFIG_HOME:-$HOME/.config}/secrets/''${1:-default}.ejson"
-
-        if [ -f "$EJSON" ]; then
-          echo "Loading secrets: $EJSON"
-          eval "$(ejson2env "$EJSON")"
-        else
-          echo "Secrets file not found: $EJSON"
-          return 1
-        fi
-      }
+      # Load external function files to keep this file small. If you want the
+      # editable secrets helper, place a file at
+      # ${config.xdg.configHome}/dotfiles/functions/secrets and it will
+      # be sourced here.
+      SECRETS_FUNCTION_FILE="${config.xdg.configHome}/dotfiles/functions/secrets"
+      if [ -r "$SECRETS_FUNCTION_FILE" ]; then
+        # shellcheck source=/dev/null
+        source "$SECRETS_FUNCTION_FILE"
+      fi
 
       # load default secrets at shell startup (only if the file exists)
-      if [ -f "''${XDG_CONFIG_HOME:-$HOME/.config}/secrets/default.ejson" ]; then
+      if [ -f "${config.xdg.configHome}/secrets/default.ejson" ]; then
         secrets
       fi
     '';
@@ -58,7 +55,7 @@
   # Seed an empty default secrets file on new machines. Existing secrets are
   # never overwritten; populated secret values are restored out-of-band.
   home.activation.seedDefaultEjsonSecrets = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    secrets_dir="''${XDG_CONFIG_HOME:-$HOME/.config}/secrets"
+    secrets_dir="${config.xdg.configHome}/secrets"
     default_ejson="$secrets_dir/default.ejson"
     keydir="/opt/ejson/keys"
 
@@ -111,5 +108,12 @@ SECRETS_EOF
     gcloud.disabled = true;
     nix_shell.disabled = true;
     package.disabled = true;
+  };
+
+  # Install helper function file under XDG_CONFIG_HOME so the runtime shell can
+  # source it. This places the file at ${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/functions/secrets
+  home.file."${config.xdg.configHome}/dotfiles/functions/secrets" = {
+    source = ./dotfiles/functions/secrets;
+    mode = "0755";
   };
 }
