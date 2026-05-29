@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# Rich preview filter for less(1). Unknown or unsupported files exit non-zero
+# so less falls back to its default behavior.
+
+set -o pipefail
+
+file="${1:-}"
+[ -n "$file" ] && [ -f "$file" ] || exit 1
+
+case "$file" in
+  *.md|*.markdown|*.mdown|*.mkd)
+    exec glow --style auto --width "${COLUMNS:-100}" "$file"
+    ;;
+  *.json)
+    jq empty "$file" >/dev/null 2>&1 || exit 1
+    exec jq -C . "$file"
+    ;;
+  *.yaml|*.yml)
+    yq eval '.' "$file" >/dev/null 2>&1 || exit 1
+    exec yq -C -P eval '.' "$file"
+    ;;
+  *)
+    exit 1
+    ;;
+esac
