@@ -9,8 +9,11 @@ flake.nix        # entry point — inputs and darwinConfigurations
 darwin.nix       # system-level config (nix-darwin)
 home/
   default.nix    # home-manager entry point
+  dotfiles/      # helper files installed under ~/.config/dotfiles/
+    lessfilter   # LESSOPEN renderer for Markdown/JSON/YAML
+    functions/secrets # sourced secrets helper
   ghostty.nix    # shared Ghostty terminal config
-  tools.nix      # user packages
+  tools.nix      # user packages, env vars, lessfilter wrapper
   shell.nix      # zsh, starship, aliases, direnv, 1Password plugins
   git.nix        # git settings and global ignores
   pi.nix         # pi coding agent config (seed settings, clone pi-extensions)
@@ -265,3 +268,4 @@ Project-specific dev environments live in each repo as `flake.nix` + `.envrc` an
 | Global gitignore for `.direnv/` | Managed by Nix; no need to add per-project |
 | nixpkgs-unstable tracking branch | Track current Darwin fixes while `flake.lock` pins exact revisions |
 | Home Manager release check disabled | Intentional `nixpkgs-unstable` + `home-manager/master` pairing can report different release numbers |
+| Glow 1.5.1 pinned via `nixpkgs-glow` | Glow 2.x currently emits ANSI sequences that `less -R` does not preserve reliably via `LESSOPEN`; the wrapped lessfilter keeps personal and work machines on the same renderer |
