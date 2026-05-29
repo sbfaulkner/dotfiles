@@ -35,10 +35,7 @@
       unsetopt hist_verify
       setopt rm_star_silent
 
-      # Load external function files to keep this file small. If you want the
-      # editable secrets helper, place a file at
-      # ${config.xdg.configHome}/dotfiles/functions/secrets and it will
-      # be sourced here.
+      # Load managed external function files to keep this file small.
       SECRETS_FUNCTION_FILE="${config.xdg.configHome}/dotfiles/functions/secrets"
       if [ -r "$SECRETS_FUNCTION_FILE" ]; then
         # shellcheck source=/dev/null
@@ -111,9 +108,8 @@ SECRETS_EOF
   };
 
   # Install helper function file under XDG_CONFIG_HOME so the runtime shell can
-  # source it. This places the file at ${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/functions/secrets
-  home.file."${config.xdg.configHome}/dotfiles/functions/secrets" = {
+  # source it. The file is sourced, not executed, so no executable mode is needed.
+  xdg.configFile."dotfiles/functions/secrets" = {
     source = ./dotfiles/functions/secrets;
-    mode = "0755";
   };
 }
