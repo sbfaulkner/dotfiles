@@ -184,6 +184,21 @@ Pi configuration is managed by `home/pi.nix`:
 To regenerate settings from scratch, delete `~/.pi/agent/settings.json` and run
 `reflake`.
 
+## Rich `less` previews
+
+Home Manager installs a small `LESSOPEN` filter at
+`~/.config/dotfiles/lessfilter` for common text formats:
+
+| File type | Renderer |
+|---|---|
+| Markdown (`*.md`, `*.markdown`) | `glow` |
+| JSON (`*.json`) | `jq -C .` |
+| YAML (`*.yaml`, `*.yml`) | `yq -C -P` |
+
+The managed `LESS=-RFX` keeps ANSI colors enabled, quits automatically for
+one-screen output, and leaves viewed content in terminal scrollback after exit.
+Unsupported files fall back to normal `less` behavior.
+
 ## Secrets
 
 Encrypted secrets are managed via [ejson](https://github.com/Shopify/ejson) and

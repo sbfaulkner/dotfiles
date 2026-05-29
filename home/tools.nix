@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, config, ... }:
 
 let
   ghVersion = "2.92.0";
@@ -27,10 +27,12 @@ in
     fd         # fast alternative to find
     # Use pinned GitHub CLI release instead of the nixpkgs-provided package
     ghBin
+    glow       # Markdown renderer used by lessfilter
     jq         # JSON query/filter CLI
     nodejs     # javascript runtime
     pnpm       # fast, disk-efficient package manager (used at work too)
     ripgrep    # fast recursive grep (rg)
+    yq-go      # YAML query/pretty-printer used by lessfilter
   ];
 
   # direnv + nix-direnv: automatically activate per-project flake dev shells
@@ -44,8 +46,15 @@ in
   # Global binaries installed with `pnpm add -g` land directly in $PNPM_HOME.
   home.sessionVariables = {
     EDITOR = "code --wait";
-    LESS = "-RF";
+    LESS = "-RFX";
+    LESSOPEN = "|${config.xdg.configHome}/dotfiles/lessfilter %s";
     PNPM_HOME = "$HOME/.local/share/pnpm";
+  };
+
+  # Render common structured docs/configs before handing them to less.
+  xdg.configFile."dotfiles/lessfilter" = {
+    source = ./dotfiles/lessfilter;
+    executable = true;
   };
 
   # Add pnpm global bin to PATH so pnpm-installed tools are found.
