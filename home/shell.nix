@@ -109,4 +109,9 @@ SECRETS_EOF
     nix_shell.disabled = true;
     package.disabled = true;
   };
+
+  # Install helper function file under XDG_CONFIG_HOME so the runtime shell can
+  # source it. This places the file at ${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/functions/secrets
+  home.file."${config.xdg.configHome}/dotfiles/functions/secrets".source = ./dotfiles/functions/secrets;
+  home.file."${config.xdg.configHome}/dotfiles/functions/secrets".mode = "0755";
 }
