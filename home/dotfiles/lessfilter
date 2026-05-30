@@ -6,7 +6,7 @@ set -o pipefail
 file="${1:-}"
 [ -n "$file" ] && [ -f "$file" ] || exit 1
 
-COLUMNS="${COLUMNS:-$(tput cols 2>/dev/null)}"
+COLUMNS="${COLUMNS:-$(tput cols 2>/dev/null || true)}"
 COLUMNS="${COLUMNS:-100}"
 
 detect_theme(){
