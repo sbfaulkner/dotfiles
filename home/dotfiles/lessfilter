@@ -16,8 +16,8 @@ detect_theme(){
 
 case "$file" in
   *.md|*.markdown|*.mdown|*.mkd)
-    theme=$(detect_theme)
-    exec glow --style "$theme" --width "${COLUMNS:-100}" "$file"
+    glow --version >/dev/null 2>&1 || exit 1
+    exec glow --style "$(detect_theme)" --width "${COLUMNS:-100}" "$file"
     ;;
   *.json)
     jq --version >/dev/null 2>&1 || exit 1
