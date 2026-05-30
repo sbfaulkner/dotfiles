@@ -6,6 +6,13 @@ set -o pipefail
 file="${1:-}"
 [ -n "$file" ] && [ -f "$file" ] || exit 1
 
+# determine columns: prefer $COLUMNS, fall back to tput cols, then 100
+cols="${COLUMNS:-}"
+if [ -z "$cols" ]; then
+  cols=$(tput cols 2>/dev/null || true)
+fi
+width="${cols:-100}"
+
 detect_theme(){
   if defaults read -g AppleInterfaceStyle >/dev/null 2>&1; then
     printf 'dark'
@@ -17,7 +24,7 @@ detect_theme(){
 case "$file" in
   *.md|*.markdown|*.mdown|*.mkd)
     glow --version >/dev/null 2>&1 || exit 1
-    exec glow --style "$(detect_theme)" --width "${COLUMNS:-100}" "$file"
+    exec glow --style "$(detect_theme)" --width "$width" "$file"
     ;;
   *.json)
     jq --version >/dev/null 2>&1 || exit 1
