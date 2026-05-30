@@ -17,16 +17,55 @@ detect_theme(){
   fi
 }
 
+format=""
 case "$file" in
   *.md|*.markdown|*.mdown|*.mkd)
+    format="markdown"
+    ;;
+  *.json)
+    format="json"
+    ;;
+  *.yaml|*.yml)
+    format="yaml"
+    ;;
+esac
+
+detect_mime(){
+  local mime
+  if command -v file >/dev/null 2>&1; then
+    mime="$(file --mime-type -b -- "$file" 2>/dev/null || true)"
+    mime="$(printf '%s' "$mime" | tr '[:upper:]' '[:lower:]')"
+  else
+    mime=""
+  fi
+
+  case "$mime" in
+    application/json|text/json|application/x-json|*+json)
+      format="json"
+      ;;
+    text/markdown|text/x-markdown)
+      format="markdown"
+      ;;
+    application/x-yaml|text/yaml|text/x-yaml)
+      format="yaml"
+      ;;
+  esac
+}
+
+if [ -z "$format" ]; then
+  detect_mime
+fi
+
+case "$format" in
+  markdown)
     glow --version >/dev/null 2>&1 || exit 1
     exec glow --style "$(detect_theme)" --width "$COLUMNS" "$file"
     ;;
-  *.json)
+  json)
     jq --version >/dev/null 2>&1 || exit 1
     exec jq -C . "$file"
     ;;
-  *.yaml|*.yml)
+  yaml)
     yq --version >/dev/null 2>&1 || exit 1
     exec yq -C -P eval '.' "$file"
     ;;
