@@ -6,8 +6,11 @@ set -o pipefail
 file="${1:-}"
 [ -n "$file" ] && [ -f "$file" ] || exit 1
 
-COLUMNS="${COLUMNS:-$(tput cols 2>/dev/null || true)}"
-COLUMNS="${COLUMNS:-100}"
+get_columns(){
+  local cols
+  cols="${COLUMNS:-$(tput cols 2>/dev/null || true)}"
+  printf '%s' "${cols:-100}"
+}
 
 detect_theme(){
   if defaults read -g AppleInterfaceStyle >/dev/null 2>&1; then
@@ -59,7 +62,7 @@ fi
 case "$format" in
   markdown)
     glow --version >/dev/null 2>&1 || exit 1
-    exec glow --style "$(detect_theme)" --width "$COLUMNS" "$file"
+    exec glow --style "$(detect_theme)" --width "$(get_columns)" "$file"
     ;;
   json)
     jq --version >/dev/null 2>&1 || exit 1
