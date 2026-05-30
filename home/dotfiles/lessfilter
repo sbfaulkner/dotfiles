@@ -3,26 +3,15 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-# Rich preview filter for less(1). Unknown or unsupported files exit non-zero
-# so less falls back to its default behaviour.
-
 file="${1:-}"
 [ -n "$file" ] && [ -f "$file" ] || exit 1
 
-# Try to detect terminal background theme (light/dark).
-# 1) Query terminal background via OSC 11 on /dev/tty
-# 2) Fallback to $COLORFGBG (if present)
-# 3) Default to dark
-
-detect_theme() {
-  # macOS: use system appearance
-  # defaults read -g AppleInterfaceStyle returns 0 when Dark is set
+detect_theme(){
   if defaults read -g AppleInterfaceStyle >/dev/null 2>&1; then
     printf 'dark'
   else
     printf 'light'
   fi
-  return 0
 }
 
 case "$file" in
