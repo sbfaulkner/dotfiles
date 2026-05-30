@@ -15,53 +15,13 @@ file="${1:-}"
 # 3) Default to dark
 
 detect_theme() {
-  local tty reply rhex ghex bhex r g b lum bg
-  tty=/dev/tty
-
-  # Ask terminal for background color (OSC 11)
-  printf '\e]11;?\a' >"$tty" 2>/dev/null || true
-
-  # Short timeout read for reply like: \e]11;rgb:RRRR/GGGG/BBBB\a
-  reply=''
-  IFS= read -r -t 0.15 reply <"$tty" || true
-
-  if [[ $reply =~ rgb:([0-9A-Fa-f]+)/([0-9A-Fa-f]+)/([0-9A-Fa-f]+) ]]; then
-    rhex=${BASH_REMATCH[1]}
-    ghex=${BASH_REMATCH[2]}
-    bhex=${BASH_REMATCH[3]}
-    # Normalize to 2 hex-digit components by taking the first 2 chars
-    rhex=${rhex:0:2}
-    ghex=${ghex:0:2}
-    bhex=${bhex:0:2}
-    # Convert to decimal
-    r=$((16#${rhex}))
-    g=$((16#${ghex}))
-    b=$((16#${bhex}))
-    # Luminance approximation
-    lum=$(awk -v R=$r -v G=$g -v B=$b 'BEGIN{printf "%.0f", 0.2126*R + 0.7152*G + 0.0722*B}')
-    if (( lum > 130 )); then
-      printf 'light'
-      return 0
-    else
-      printf 'dark'
-      return 0
-    fi
+  # macOS: use system appearance
+  # defaults read -g AppleInterfaceStyle returns 0 when Dark is set
+  if defaults read -g AppleInterfaceStyle >/dev/null 2>&1; then
+    printf 'dark'
+  else
+    printf 'light'
   fi
-
-  # Fallback: COLORFGBG (format like "15;0") - take last value as bg
-  if [[ -n "${COLORFGBG:-}" ]]; then
-    bg=${COLORFGBG##*;}
-    if [[ $bg =~ ^[0-9]+$ ]] && (( bg >= 7 )); then
-      printf 'light'
-      return 0
-    else
-      printf 'dark'
-      return 0
-    fi
-  fi
-
-  # Final fallback
-  printf 'dark'
   return 0
 }
 
