@@ -20,20 +20,21 @@ detect_theme(){
   fi
 }
 
-format=""
-case "$file" in
-  *.md|*.markdown|*.mdown|*.mkd)
-    format="markdown"
-    ;;
-  *.json)
-    format="json"
-    ;;
-  *.yaml|*.yml)
-    format="yaml"
-    ;;
-esac
+format_for_extension(){
+  case "$1" in
+    *.md|*.markdown|*.mdown|*.mkd)
+      printf 'markdown'
+      ;;
+    *.json)
+      printf 'json'
+      ;;
+    *.yaml|*.yml)
+      printf 'yaml'
+      ;;
+  esac
+}
 
-detect_mime(){
+format_for_mime_type(){
   local mime
   if command -v file >/dev/null 2>&1; then
     mime="$(file --mime-type -b -- "$file" 2>/dev/null || true)"
@@ -44,20 +45,19 @@ detect_mime(){
 
   case "$mime" in
     application/json|text/json|application/x-json|*+json)
-      format="json"
+      echo "json"
       ;;
     text/markdown|text/x-markdown)
-      format="markdown"
+      echo "markdown"
       ;;
     application/x-yaml|text/yaml|text/x-yaml)
-      format="yaml"
+      echo "yaml"
       ;;
   esac
 }
 
-if [ -z "$format" ]; then
-  detect_mime
-fi
+format="$(format_for_extension "$file")"
+format="${format:-$(format_for_mime_type "$file")}"
 
 case "$format" in
   markdown)
