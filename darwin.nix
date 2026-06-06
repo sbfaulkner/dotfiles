@@ -24,12 +24,16 @@
     onActivation = {
       autoUpdate = true;
       cleanup = "uninstall"; # remove casks not listed here
+      extraFlags = [ "--force" ];
     };
   };
 
   # Tell nix-darwin about the user so home-manager can find the home directory.
   users.users.sbfaulkner.home = "/Users/sbfaulkner";
 
+  # Keep ejson private keys in ejson's standard keydir. Make it writable by the
+  # primary user so `ejson keygen --write` works for shell-managed secrets.
+  #
   # Keep ejson private keys in ejson's standard keydir. Make it writable by the
   # primary user so `ejson keygen --write` works for shell-managed secrets.
   system.activationScripts.extraActivation.text = lib.mkAfter ''
