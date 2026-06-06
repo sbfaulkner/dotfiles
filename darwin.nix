@@ -24,6 +24,7 @@
     onActivation = {
       autoUpdate = true;
       cleanup = "uninstall"; # remove casks not listed here
+      extraFlags = [ "--force" ];
     };
   };
 
