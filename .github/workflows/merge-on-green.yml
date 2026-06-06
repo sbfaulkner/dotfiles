@@ -3,6 +3,8 @@ name: "Merge update PRs on green"
 on:
   check_suite:
     types: [completed]
+  pull_request:
+    types: [labeled]
   workflow_dispatch:
     inputs:
       pr_number:
@@ -26,21 +28,36 @@ jobs:
             const owner = github.context.repo.owner;
             const repo = github.context.repo.repo;
 
-            // Determine the head SHA for the completed check_suite
-            const headSha = github.event.check_suite?.head_sha;
-            if (!headSha) {
-              console.log('No head SHA found on event; nothing to do.');
-              return;
-            }
+            // Determine the event type and head SHA
+            let headSha = null;
+            let prs = [];
 
-            console.log(`Checks completed for commit ${headSha}`);
+            if (github.context.eventName === 'pull_request' && github.event.action === 'labeled') {
+              // Labeled event: get the PR directly
+              const prNumber = github.event.pull_request.number;
+              headSha = github.event.pull_request.head.sha;
+              console.log(`Label event for PR #${prNumber}, head ${headSha}`);
 
-            // List PRs associated with this commit
-            const prsRes = await github.rest.repos.listPullRequestsAssociatedWithCommit({ owner, repo, commit_sha: headSha });
-            const prs = prsRes.data || [];
-            if (prs.length === 0) {
-              console.log('No PRs associated with commit, nothing to do.');
-              return;
+              // Fetch PR details to examine labels and head ref
+              const prRes = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
+              prs = [prRes.data];
+            } else {
+              // Fallback: check_suite or other events with a head SHA
+              headSha = github.event.check_suite?.head_sha || github.inputs?.head_sha;
+              if (!headSha) {
+                console.log('No head SHA found on event; nothing to do.');
+                return;
+              }
+
+              console.log(`Checks completed for commit ${headSha}`);
+
+              // List PRs associated with this commit
+              const prsRes = await github.rest.repos.listPullRequestsAssociatedWithCommit({ owner, repo, commit_sha: headSha });
+              prs = prsRes.data || [];
+              if (prs.length === 0) {
+                console.log('No PRs associated with commit, nothing to do.');
+                return;
+              }
             }
 
             for (const pr of prs) {
@@ -49,7 +66,8 @@ jobs:
               console.log(`Found PR #${prNumber} for head ref ${headRef}`);
 
               // Require explicit 'merge-on-green' label to opt-in to auto-merge
-              const hasMergeOnGreenLabel = (pr.labels || []).some(l => l.name === 'merge-on-green');
+              const labels = (pr.labels || []).map(l => l.name);
+              const hasMergeOnGreenLabel = labels.includes('merge-on-green');
               if (!hasMergeOnGreenLabel) {
                 console.log(`Skipping PR #${prNumber}: missing 'merge-on-green' label.`);
                 continue;
