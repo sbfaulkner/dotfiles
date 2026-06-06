@@ -66,6 +66,13 @@ in
     source = "${lessfilter}/bin/lessfilter";
   };
 
+  # Install check-reflake helper under XDG config so it's available at
+  # $XDG_CONFIG_HOME/dotfiles/check-reflake. We invoke it with sh so it
+  # doesn't require an executable bit to be preserved by the installer.
+  xdg.configFile."dotfiles/check-reflake" = {
+    source = ./dotfiles/check-reflake;
+  };
+
   # Add pnpm global bin to PATH so pnpm-installed tools are found.
   home.sessionPath = [
     "$HOME/.local/share/pnpm"
