@@ -137,15 +137,5 @@ jobs:
               console.log(`Failed to add label to PR #${pr.data.number}: ${err}`);
             }
 
-            // Check whether there are any check runs for this commit. If none, trigger the merge-on-green workflow
-            const headSha = pr.data.head.sha;
-            const checks = await github.rest.checks.listForRef({ owner, repo, ref: headSha });
-            const checkRuns = checks.data.check_runs || [];
-
-            // Also inspect combined status
-            const combined = await github.rest.repos.getCombinedStatusForRef({ owner, repo, ref: headSha });
-            const combinedState = combined.data.state; // 'success', 'pending', 'failure', 'error'
-
-            console.log(`Found ${checkRuns.length} check-runs for ${headSha}; merge-on-green will act on check_suite.completed events.`);
-
+            // Done: label added and PR created. merge-on-green workflow will handle merging when appropriate.
             return `updated: ${pr.data.number}`;
