@@ -43,126 +43,98 @@ jobs:
             exit 0
           fi
 
-      - name: Check for existing update branch or open PR
-        id: check_existing
+      - name: Controller: download, update file, create PR, enable auto-merge
         if: steps.compare.outputs.latest != steps.read_current.outputs.current
         uses: actions/github-script@v8
         env:
           LATEST: ${{ steps.compare.outputs.latest }}
+          BASE: main
+          PKG_PATH: pkgs/pi-coding-agent.nix
         with:
           script: |
-            // Robustly determine owner/repo; github.context.repo may be undefined in some invocations
-            const repoFull = process.env.GITHUB_REPOSITORY || '';
-            const parts = repoFull.split('/');
-            const owner = parts[0] || github.context.repo?.owner || '';
-            const repo = parts[1] || github.context.repo?.repo || '';
-            const tag = process.env.LATEST;
-            const branch = `update/pi-coding-agent-v${tag}`;
-            console.log(`Looking for existing open PR for branch ${branch} in ${owner}/${repo}`);
+            const owner = github.context.repo.owner || process.env.GITHUB_REPOSITORY?.split('/')[0];
+            const repo = github.context.repo.repo || process.env.GITHUB_REPOSITORY?.split('/')[1];
+            const latest = process.env.LATEST;
+            const base = process.env.BASE;
+            const path = process.env.PKG_PATH;
 
-            // Check for open PR with this head
+            console.log(`Update controller running for ${owner}/${repo}, latest=${latest}`);
+
+            // Build branch name
+            const branch = `update/pi-coding-agent-v${latest}`;
+
+            // Check for existing open PR for this head
             const prs = await github.rest.pulls.list({ owner, repo, head: `${owner}:${branch}`, state: 'open', per_page: 1 });
             if (prs.data && prs.data.length > 0) {
-              console.log(`An open PR already exists for ${branch}; exiting.`);
-              return 'exists';
+              console.log(`Open PR already exists for ${branch}; nothing to do.`);
+              return 'pr-exists';
             }
 
-            // Check if branch exists
+            // Check if branch already exists
             try {
               await github.rest.repos.getBranch({ owner, repo, branch });
-              console.log(`Branch ${branch} already exists in the repo; exiting.`);
+              console.log(`Branch ${branch} already exists; nothing to do.`);
               return 'branch-exists';
             } catch (err) {
-              if (err.status === 404) {
-                console.log('No branch found, proceeding.');
-                return 'ok';
+              if (err.status !== 404) throw err;
+            }
+
+            // Download release tarball and compute sha256 base64
+            const url = `https://github.com/earendil-works/pi/releases/download/v${latest}/pi-darwin-arm64.tar.gz`;
+            console.log(`Downloading ${url}`);
+            const res = await fetch(url);
+            if (!res.ok) throw new Error(`Failed to download ${url}: ${res.status}`);
+            const arrayBuf = await res.arrayBuffer();
+            const buffer = Buffer.from(arrayBuf);
+            const crypto = require('crypto');
+            const digest = crypto.createHash('sha256').update(buffer).digest('base64');
+            const newHash = `sha256-${digest}`;
+            console.log(`Computed hash: ${newHash}`);
+
+            // Read current file from base branch
+            const file = await github.rest.repos.getContent({ owner, repo, path, ref: base });
+            if (!file || !file.data) throw new Error('Failed to read package file');
+            const fileSha = file.data.sha;
+            const content = Buffer.from(file.data.content, 'base64').toString('utf8');
+
+            // Update version and hash in the file content
+            let newContent = content.replace(/version = \"[^\"]+\";/, `version = \"${latest}\";`);
+            newContent = newContent.replace(/hash = \"[^\"]+\";/, `hash = \"${newHash}\";`);
+
+            if (newContent === content) {
+              console.log('No changes detected in file content after replacements; aborting.');
+              return 'no-change';
+            }
+
+            // Create new branch from base
+            const baseRef = await github.rest.git.getRef({ owner, repo, ref: `heads/${base}` });
+            const baseSha = baseRef.data.object.sha;
+            try {
+              await github.rest.git.createRef({ owner, repo, ref: `refs/heads/${branch}`, sha: baseSha });
+            } catch (err) {
+              if (err.status === 422) {
+                console.log('Branch already created by another run; aborting.');
+                return 'branch-exists-concurrent';
               }
               throw err;
             }
 
-      - name: Download release tarball (darwin aarch64)
-        if: steps.compare.outputs.latest != steps.read_current.outputs.current && steps.check_existing.outputs.result == 'ok'
-        run: |
-          tag="${{ steps.compare.outputs.latest }}"
-          url="https://github.com/earendil-works/pi/releases/download/v${tag}/pi-darwin-arm64.tar.gz"
-          echo "Downloading $url"
-          curl -sL "$url" -o /tmp/pi.tar.gz
+            // Commit updated file to new branch
+            const contentB64 = Buffer.from(newContent, 'utf8').toString('base64');
+            const commitMessage = `chore(pi): bump pi-coding-agent to ${latest}`;
+            await github.rest.repos.createOrUpdateFileContents({ owner, repo, path, message: commitMessage, content: contentB64, branch, sha: fileSha });
+            console.log(`Pushed updated file to branch ${branch}`);
 
-      - name: Compute sha256 (base64) used by fetchurl
-        if: steps.compare.outputs.latest != steps.read_current.outputs.current && steps.check_existing.outputs.result == 'ok'
-        id: compute_hash
-        run: |
-          # compute raw sha256, convert hex -> raw bytes -> base64 to match existing "sha256-<base64>" form
-          hex=$(sha256sum /tmp/pi.tar.gz | awk '{print $1}')
-          b64=$(xxd -r -p <<<"$hex" | base64)
-          echo "hash=sha256-$b64" >> $GITHUB_OUTPUT
+            // Create PR
+            const pr = await github.rest.pulls.create({ owner, repo, title: commitMessage, head: branch, base, body: 'Automated update by GitHub Actions' });
+            console.log(`Created PR #${pr.data.number}`);
 
-      - name: Update pkgs/pi-coding-agent.nix
-        if: steps.compare.outputs.latest != steps.read_current.outputs.current && steps.check_existing.outputs.result == 'ok'
-        run: |
-          new_version="${{ steps.compare.outputs.latest }}"
-          new_hash="${{ steps.compute_hash.outputs.hash }}"
-
-          # Update the version and hash in the file
-          sed -E -i "s/(version = \")([^"]+)(\";)/\1${new_version}\3/" pkgs/pi-coding-agent.nix
-          sed -E -i "s@url = \"https://github.com/earendil-works/pi/releases/download/v\$\{version\}/pi-darwin-arm64.tar.gz\";@url = \"https://github.com/earendil-works/pi/releases/download/v\${version}/pi-darwin-arm64.tar.gz\";@" pkgs/pi-coding-agent.nix
-          sed -E -i "s/(hash = \")[^\"]+(\";)/\1${new_hash}\2/" pkgs/pi-coding-agent.nix
-
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          branch="update/pi-coding-agent-v${new_version}"
-          git checkout -b "$branch"
-          git add pkgs/pi-coding-agent.nix
-          git commit -m "chore(pi): bump pi-coding-agent to ${new_version}\n\nAutomated update by GitHub Actions"
-          git push --set-upstream origin "$branch"
-
-      - name: Create Pull Request via REST API
-        id: create_pr
-        if: steps.compare.outputs.latest != steps.read_current.outputs.current && steps.check_existing.outputs.result == 'ok'
-        uses: actions/github-script@v8
-        env:
-          LATEST: ${{ steps.compare.outputs.latest }}
-        with:
-          script: |
-            const owner = github.context.repo.owner;
-            const repo = github.context.repo.repo;
-            const latest = process.env.LATEST;
-            const title = `chore(pi): bump pi-coding-agent to ${latest}`;
-            const head = `update/pi-coding-agent-v${latest}`;
-            const base = 'main';
-            const body = `This PR bumps the pinned pi-coding-agent release and updates the sha256 used by the Nix package.\n\nGenerated by a scheduled GitHub Action.`;
-
-            // Create the pull request via REST API
-            const res = await github.rest.pulls.create({ owner, repo, title, head, base, body });
-            return res.data.number;
-
-      - name: Enable auto-merge via GitHub GraphQL
-        if: steps.create_pr.outputs.result != ''
-        uses: actions/github-script@v8
-        with:
-          script: |
-            const owner = github.context.repo.owner;
-            const repo = github.context.repo.repo;
-            const prNumber = parseInt('${{ steps.create_pr.outputs.result }}', 10);
-
-            // Get the pull request node ID
-            const query = `
-            query($owner:String!, $repo:String!, $number:Int!) {
-              repository(owner:$owner, name:$repo) {
-                pullRequest(number:$number) {
-                  id
-                }
-              }
-            }`;
-            const qRes = await github.graphql(query, { owner, repo, number: prNumber });
+            // Enable auto-merge via GraphQL
+            const q = `query($owner:String!, $repo:String!, $number:Int!) { repository(owner:$owner, name:$repo) { pullRequest(number:$number) { id } } }`;
+            const qRes = await github.graphql(q, { owner, repo, number: pr.data.number });
             const prId = qRes.repository.pullRequest.id;
+            const mutation = `mutation($prId:ID!, $method: PullRequestMergeMethod!) { enablePullRequestAutoMerge(input:{pullRequestId:$prId, mergeMethod:$method}) { pullRequest { number } } }`;
+            await github.graphql(mutation, { prId, method: 'MERGE' });
+            console.log(`Enabled auto-merge for PR #${pr.data.number}`);
 
-            // Enable auto-merge (MERGE | SQUASH | REBASE)
-            const mutation = `
-            mutation($prId:ID!, $method: PullRequestMergeMethod!) {
-              enablePullRequestAutoMerge(input:{pullRequestId:$prId, mergeMethod:$method}) {
-                pullRequest { number }
-              }
-            }`;
-            await github.graphql(mutation, { prId, method: "MERGE" });
-            return `Auto-merge enabled for PR #${prNumber}`;
+            return `updated: ${pr.data.number}`;
