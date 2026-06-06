@@ -28,6 +28,15 @@ let
     ];
     text = builtins.readFile ./dotfiles/lessfilter;
   };
+
+  # Install an executable copy of check-reflake so the deployed file has an
+  # executable bit and can be invoked directly from shell init.
+  check_reflake = pkgs.runCommand "check-reflake" { } ''
+    mkdir -p $out
+    cp ${./dotfiles/check-reflake} $out/check-reflake
+    chmod +x $out/check-reflake
+  '';
+
 in
 {
   home.packages = with pkgs; [
@@ -67,10 +76,10 @@ in
   };
 
   # Install check-reflake helper under XDG config so it's available at
-  # $XDG_CONFIG_HOME/dotfiles/check-reflake. We invoke it with sh so it
-  # doesn't require an executable bit to be preserved by the installer.
+  # $XDG_CONFIG_HOME/dotfiles/check-reflake. The deployed file is executable
+  # (built from a small derivation above) so shells can run it directly.
   xdg.configFile."dotfiles/check-reflake" = {
-    source = ./dotfiles/check-reflake;
+    source = "${check_reflake}/check-reflake";
   };
 
   # Add pnpm global bin to PATH so pnpm-installed tools are found.
