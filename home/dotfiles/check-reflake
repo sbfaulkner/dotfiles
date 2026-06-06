@@ -156,9 +156,34 @@ run_reflake(){
 
 # decide action
 if [[ $remote_changed -eq 0 && $local_changed -eq 0 ]]; then
-  # nothing changed — update epoch to avoid repeated prompts
-  printf "LAST_EPOCH=%s\n" "$now_epoch" > "$STATE_FILE"
-  exit 0
+  # No immediate changes. If age threshold exceeded, prompt to run reflake.
+  if [[ $elapsed -ge $age_seconds ]]; then
+    # Non-interactive: write status and exit
+    if ! is_tty && [[ $YES -eq 0 ]]; then
+      printf "LAST_EPOCH=%s\nLAST_HEAD=%s\n" "$now_epoch" "$local_head" > "$STATE_FILE"
+      exit 0
+    fi
+
+    printf "It\'s been %d days since last reflake. Run reflake now? [y/N] " $(( elapsed / 86400 ))
+    read -r ans || ans="n"
+    if [[ "$ans" =~ ^[Yy]$ ]]; then
+      if repo_clean; then
+        run_reflake || exit $?
+        # record success
+        now_epoch=$(date +%s)
+        printf "LAST_EPOCH=%s\nLAST_HEAD=%s\n" "$now_epoch" "$local_head" > "$STATE_FILE"
+        exit 0
+      else
+        echo "Repo dirty; please stash/commit before running reflake." >&2
+        exit 3
+      fi
+    else
+      echo "Skipped."; exit 0
+    fi
+  else
+    # not old enough
+    exit 0
+  fi
 fi
 
 # If non-interactive and not --yes, do nothing (avoid background prompts)
