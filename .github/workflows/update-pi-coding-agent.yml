@@ -129,6 +129,14 @@ jobs:
             const pr = await github.rest.pulls.create({ owner, repo, title: commitMessage, head: branch, base, body: 'Automated update by GitHub Actions' });
             console.log(`Created PR #${pr.data.number}`);
 
+            // Add merge-on-green label so the merged-on-green workflow can opt-in
+            try {
+              await github.rest.issues.addLabels({ owner, repo, issue_number: pr.data.number, labels: ['merge-on-green'] });
+              console.log('Added label merge-on-green to PR');
+            } catch (err) {
+              console.log(`Failed to add label to PR #${pr.data.number}: ${err}`);
+            }
+
             // Check whether there are any check runs for this commit. If none, trigger the merge-on-green workflow
             const headSha = pr.data.head.sha;
             const checks = await github.rest.checks.listForRef({ owner, repo, ref: headSha });
