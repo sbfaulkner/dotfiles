@@ -36,6 +36,11 @@
 
     # Graphite completions
     eval "$(gt completion)"
+
+    # Run reflake check in background once-per-login (non-blocking)
+    if [[ -f $HOME/.config/dotfiles/check-reflake ]]; then
+      (sh "$HOME/.config/dotfiles/check-reflake" &) >/dev/null 2>&1 || true
+    fi
   '';
 
   home.sessionPath = [

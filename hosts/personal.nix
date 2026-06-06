@@ -18,4 +18,11 @@
     defaultProvider = "github-copilot";
     defaultModel = "gpt-5-mini";
   };
+
+  # Run reflake check in background once-per-login (non-blocking)
+  programs.zsh.initContent = ''
+    if [[ -f $HOME/.config/dotfiles/check-reflake ]]; then
+      (sh "$HOME/.config/dotfiles/check-reflake" &) >/dev/null 2>&1 || true
+    fi
+  '';
 }
