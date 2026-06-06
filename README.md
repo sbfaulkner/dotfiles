@@ -55,6 +55,8 @@ reflake
 # work:     home-manager switch --flake ~/src/github.com/sbfaulkner/dotfiles#work
 ```
 
+Note about automatic updates: a lightweight zsh-initiated check (check-reflake) is available and runs once-per-login in the background if present at $XDG_CONFIG_HOME/dotfiles/check-reflake. The script (deployed from home/tools.nix) detects remote and local changes and can prompt or automatically run the appropriate `reflake` command; it supports modes such as `prompt` (default), `auto`, `auto-pull`, and `disabled`. Hosts invoke it from their zsh init (see hosts/personal.nix and hosts/work-shell.nix).
+
 ## Bootstrap (new machine)
 
 Recommended bootstrap entry point for any Apple Silicon Mac:
