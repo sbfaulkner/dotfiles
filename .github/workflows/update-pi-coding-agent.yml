@@ -129,6 +129,34 @@ jobs:
             const pr = await github.rest.pulls.create({ owner, repo, title: commitMessage, head: branch, base, body: 'Automated update by GitHub Actions' });
             console.log(`Created PR #${pr.data.number}`);
 
-            console.log(`Skipping enablePullRequestAutoMerge; merge-on-green workflow will handle merges.`);
+            // Check whether there are any check runs for this commit. If none, trigger the merge-on-green workflow
+            const headSha = pr.data.head.sha;
+            const checks = await github.rest.checks.listForRef({ owner, repo, ref: headSha });
+            const checkRuns = checks.data.check_runs || [];
+
+            // Also inspect combined status
+            const combined = await github.rest.repos.getCombinedStatusForRef({ owner, repo, ref: headSha });
+            const combinedState = combined.data.state; // 'success', 'pending', 'failure', 'error'
+
+            if (checkRuns.length === 0) {
+              console.log(`No check-runs found for ${headSha}. Triggering merge-on-green workflow to handle merging.`);
+              try {
+                await github.rest.actions.createWorkflowDispatch({
+                  owner,
+                  repo,
+                  workflow_id: 'merge-on-green.yml',
+                  ref: 'main',
+                  inputs: {
+                    pr_number: String(pr.data.number),
+                    head_sha: headSha,
+                  }
+                });
+                console.log('Triggered merge-on-green via workflow_dispatch');
+              } catch (err) {
+                console.log('Failed to dispatch merge-on-green workflow:', err);
+              }
+            } else {
+              console.log(`Found ${checkRuns.length} check-runs for ${headSha}; merge-on-green will act on check_suite.completed events.`);
+            }
 
             return `updated: ${pr.data.number}`;

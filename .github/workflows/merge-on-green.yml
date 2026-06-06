@@ -3,6 +3,14 @@ name: "Merge update PRs on green"
 on:
   check_suite:
     types: [completed]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to process (optional)'
+        required: false
+      head_sha:
+        description: 'Commit SHA to check (optional)'
+        required: false
 
 jobs:
   merge:
