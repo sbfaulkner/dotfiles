@@ -25,8 +25,9 @@ jobs:
         uses: actions/github-script@v8
         with:
           script: |
-            const owner = github.context.repo.owner;
-            const repo = github.context.repo.repo;
+            // Resolve owner/repo defensively (some event contexts can omit github.context.repo)
+            const owner = (github.context.repo && github.context.repo.owner) || (process.env.GITHUB_REPOSITORY || '').split('/')[0];
+            const repo = (github.context.repo && github.context.repo.repo) || (process.env.GITHUB_REPOSITORY || '').split('/')[1];
 
             // Determine the event type and head SHA
             let headSha = null;
