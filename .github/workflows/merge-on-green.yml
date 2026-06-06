@@ -1,0 +1,74 @@
+name: "Merge update PRs on green"
+
+on:
+  check_suite:
+    types: [completed]
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Merge update PRs if checks passed
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const owner = github.context.repo.owner;
+            const repo = github.context.repo.repo;
+
+            // Determine the head SHA for the completed check_suite
+            const headSha = github.event.check_suite?.head_sha;
+            if (!headSha) {
+              console.log('No head SHA found on event; nothing to do.');
+              return;
+            }
+
+            console.log(`Checks completed for commit ${headSha}`);
+
+            // List PRs associated with this commit
+            const prsRes = await github.rest.repos.listPullRequestsAssociatedWithCommit({ owner, repo, commit_sha: headSha });
+            const prs = prsRes.data || [];
+            if (prs.length === 0) {
+              console.log('No PRs associated with commit, nothing to do.');
+              return;
+            }
+
+            // helper: identify update branches
+            const isAutoUpdateBranch = (ref) => {
+              return ref.startsWith('update/pi-coding-agent-v') || ref.startsWith('update/');
+            };
+
+            for (const pr of prs) {
+              const prNumber = pr.number;
+              const headRef = pr.head.ref;
+              console.log(`Found PR #${prNumber} for head ref ${headRef}`);
+
+              if (!isAutoUpdateBranch(headRef)) {
+                console.log(`Skipping PR #${prNumber}: head ref is not an auto-update branch.`);
+                continue;
+              }
+
+              // Double-check combined status is successful
+              const combined = await github.rest.repos.getCombinedStatusForRef({ owner, repo, ref: headSha });
+              if (combined.data.state !== 'success') {
+                console.log(`Checks not all successful for ${headSha} (state=${combined.data.state}); skipping PR #${prNumber}.`);
+                continue;
+              }
+
+              // Optional: check there are no failing check-runs
+              const runs = await github.rest.checks.listForRef({ owner, repo, ref: headSha });
+              if ((runs.data.check_runs || []).some(r => r.conclusion === 'failure' || r.conclusion === 'cancelled')) {
+                console.log(`Some checks failed for ${headSha}; skipping PR #${prNumber}.`);
+                continue;
+              }
+
+              // Attempt the merge (merge_method: merge)
+              try {
+                const mergeRes = await github.rest.pulls.merge({ owner, repo, pull_number: prNumber, merge_method: 'merge' });
+                console.log(`Merged PR #${prNumber}: ${mergeRes.data.sha}`);
+              } catch (err) {
+                console.log(`Failed to merge PR #${prNumber}: ${err}`);
+              }
+            }
