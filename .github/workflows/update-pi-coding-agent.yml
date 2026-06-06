@@ -51,11 +51,14 @@ jobs:
           LATEST: ${{ steps.compare.outputs.latest }}
         with:
           script: |
-            const owner = github.context.repo.owner;
-            const repo = github.context.repo.repo;
+            // Robustly determine owner/repo; github.context.repo may be undefined in some invocations
+            const repoFull = process.env.GITHUB_REPOSITORY || '';
+            const parts = repoFull.split('/');
+            const owner = parts[0] || github.context.repo?.owner || '';
+            const repo = parts[1] || github.context.repo?.repo || '';
             const tag = process.env.LATEST;
             const branch = `update/pi-coding-agent-v${tag}`;
-            console.log(`Looking for existing open PR for branch ${branch}`);
+            console.log(`Looking for existing open PR for branch ${branch} in ${owner}/${repo}`);
 
             // Check for open PR with this head
             const prs = await github.rest.pulls.list({ owner, repo, head: `${owner}:${branch}`, state: 'open', per_page: 1 });
