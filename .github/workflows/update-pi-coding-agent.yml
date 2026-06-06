@@ -43,8 +43,8 @@ jobs:
             exit 0
           fi
 
-      - name: Controller: download, update file, create PR, enable auto-merge
-        if: steps.compare.outputs.latest != steps.read_current.outputs.current
+      - name: "Controller: download, update file, create PR, enable auto-merge"
+        if: ${{ steps.compare.outputs.latest != steps.read_current.outputs.current }}
         uses: actions/github-script@v8
         env:
           LATEST: ${{ steps.compare.outputs.latest }}
