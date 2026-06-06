@@ -129,43 +129,16 @@ jobs:
             const pr = await github.rest.pulls.create({ owner, repo, title: commitMessage, head: branch, base, body: 'Automated update by GitHub Actions' });
             console.log(`Created PR #${pr.data.number}`);
 
-            // Label the PR for policy-driven auto-merge
-            const autoLabel = 'auto-merge';
+            // Try to enable auto-merge (will only succeed if repo allows it)
             try {
-              await github.rest.issues.addLabels({ owner, repo, issue_number: pr.data.number, labels: [autoLabel] });
-              console.log(`Added label '${autoLabel}' to PR #${pr.data.number}`);
+              const q = `query($owner:String!, $repo:String!, $number:Int!) { repository(owner:$owner, name:$repo) { pullRequest(number:$number) { id } } }`;
+              const qRes = await github.graphql(q, { owner, repo, number: pr.data.number });
+              const prId = qRes.repository.pullRequest.id;
+              const mutation = `mutation($prId:ID!, $mergeMethod: PullRequestMergeMethod!) { enablePullRequestAutoMerge(input:{pullRequestId:$prId, mergeMethod:$mergeMethod}) { pullRequest { number } } }`;
+              await github.graphql(mutation, { prId, mergeMethod: 'MERGE' });
+              console.log(`Enabled auto-merge for PR #${pr.data.number}`);
             } catch (err) {
-              // If label doesn't exist, create it then re-add
-              if (err.status === 404 || err.status === 422) {
-                console.log(`Label '${autoLabel}' not present; creating it.`);
-                try {
-                  await github.rest.issues.createLabel({ owner, repo, name: autoLabel, color: 'f29513', description: 'Repository-level opt-in label for enabling auto-merge' });
-                  await github.rest.issues.addLabels({ owner, repo, issue_number: pr.data.number, labels: [autoLabel] });
-                  console.log(`Created and added label '${autoLabel}' to PR #${pr.data.number}`);
-                } catch (err2) {
-                  console.log(`Failed to create/add label '${autoLabel}': ${err2}`);
-                }
-              } else {
-                console.log(`Failed to add label '${autoLabel}': ${err}`);
-              }
-            }
-
-            // Only enable auto-merge if PR has the label (policy)
-            let labelsRes = await github.rest.issues.listLabelsOnIssue({ owner, repo, issue_number: pr.data.number });
-            const hasAutoLabel = labelsRes.data.some(l => l.name === autoLabel);
-            if (hasAutoLabel) {
-              try {
-                const q = `query($owner:String!, $repo:String!, $number:Int!) { repository(owner:$owner, name:$repo) { pullRequest(number:$number) { id } } }`;
-                const qRes = await github.graphql(q, { owner, repo, number: pr.data.number });
-                const prId = qRes.repository.pullRequest.id;
-                const mutation = `mutation($prId:ID!, $mergeMethod: PullRequestMergeMethod!) { enablePullRequestAutoMerge(input:{pullRequestId:$prId, mergeMethod:$mergeMethod}) { pullRequest { number } } }`;
-                await github.graphql(mutation, { prId, mergeMethod: 'MERGE' });
-                console.log(`Enabled auto-merge for PR #${pr.data.number}`);
-              } catch (err) {
-                console.log(`Auto-merge enable failed (may be disallowed by repo settings): ${err}`);
-              }
-            } else {
-              console.log(`Auto-merge not enabled: PR #${pr.data.number} missing '${autoLabel}' label.`);
+              console.log(`Auto-merge enable failed or disallowed: ${err}`);
             }
 
             return `updated: ${pr.data.number}`;
