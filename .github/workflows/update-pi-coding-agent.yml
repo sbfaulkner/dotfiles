@@ -146,17 +146,6 @@ jobs:
             const combined = await github.rest.repos.getCombinedStatusForRef({ owner, repo, ref: headSha });
             const combinedState = combined.data.state; // 'success', 'pending', 'failure', 'error'
 
-            if (checkRuns.length === 0) {
-              console.log(`No check-runs found for ${headSha}. Attempting to merge PR #${pr.data.number} directly.`);
-              try {
-                const mergeRes = await github.rest.pulls.merge({ owner, repo, pull_number: pr.data.number, merge_method: 'merge' });
-                console.log(`Merged PR #${pr.data.number}: ${mergeRes.data.sha}`);
-              } catch (err) {
-                // Merge can fail due to branch protection, conflicts, etc. Log and continue.
-                console.log(`Direct merge attempt failed for PR #${pr.data.number}: ${err}`);
-              }
-            } else {
-              console.log(`Found ${checkRuns.length} check-runs for ${headSha}; merge-on-green will act on check_suite.completed events.`);
-            }
+            console.log(`Found ${checkRuns.length} check-runs for ${headSha}; merge-on-green will act on check_suite.completed events.`);
 
             return `updated: ${pr.data.number}`;
