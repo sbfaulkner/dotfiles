@@ -85,11 +85,20 @@ if [[ -n "$branch" ]]; then
   remote_head=$(git -C "$DOTFILES" ls-remote origin "refs/heads/$branch" 2>/dev/null | cut -f1 || true)
 fi
 
+# detect dirty working tree (unstaged or staged changes)
+repo_dirty=0
+if ! git -C "$DOTFILES" diff --quiet --ignore-submodules -- || ! git -C "$DOTFILES" diff --cached --quiet; then
+  repo_dirty=1
+fi
+
 remote_changed=0
 local_changed=0
 
 if [[ -n "$remote_head" && "$remote_head" != "$local_head" ]]; then
   remote_changed=1
+elif [[ $repo_dirty -eq 1 ]]; then
+  # Uncommitted changes count as a local change that should prompt the user
+  local_changed=1
 elif [[ -n "$recorded_head" && "$local_head" != "$recorded_head" ]]; then
   local_changed=1
 fi
