@@ -53,6 +53,12 @@ unlock(){
   rm -rf "$LOCK_DIR" || true
 }
 
+# Acquire lock to avoid concurrent prompts/runs. If lock cannot be obtained,
+# another session is already running the check; exit quietly.
+if ! lock; then
+  exit 0
+fi
+
 trap "unlock" EXIT INT TERM
 
 # simple tty check
