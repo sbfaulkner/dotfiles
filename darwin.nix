@@ -34,12 +34,9 @@
   # Keep ejson private keys in ejson's standard keydir. Make it writable by the
   # primary user so `ejson keygen --write` works for shell-managed secrets.
   #
-  # Also set HOMEBREW_ASK=0 so `brew bundle install --cleanup` runs non-
-  # interactively; newer Homebrew requires --force/--force-cleanup or this env.
+  # Keep ejson private keys in ejson's standard keydir. Make it writable by the
+  # primary user so `ejson keygen --write` works for shell-managed secrets.
   system.activationScripts.extraActivation.text = lib.mkAfter ''
-    # Make Homebrew non-interactive during activation
-    export HOMEBREW_ASK=0
-
     mkdir -p /opt/ejson/keys
     chown sbfaulkner:staff /opt/ejson/keys
     chmod 0755 /opt/ejson/keys
