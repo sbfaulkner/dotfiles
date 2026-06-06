@@ -129,12 +129,16 @@ jobs:
             const pr = await github.rest.pulls.create({ owner, repo, title: commitMessage, head: branch, base, body: 'Automated update by GitHub Actions' });
             console.log(`Created PR #${pr.data.number}`);
 
-            // Enable auto-merge via GraphQL
-            const q = `query($owner:String!, $repo:String!, $number:Int!) { repository(owner:$owner, name:$repo) { pullRequest(number:$number) { id } } }`;
-            const qRes = await github.graphql(q, { owner, repo, number: pr.data.number });
-            const prId = qRes.repository.pullRequest.id;
-            const mutation = `mutation($prId:ID!, $mergeMethod: PullRequestMergeMethod!) { enablePullRequestAutoMerge(input:{pullRequestId:$prId, mergeMethod:$mergeMethod}) { pullRequest { number } } }`;
-            await github.graphql(mutation, { prId, mergeMethod: 'MERGE' });
-            console.log(`Enabled auto-merge for PR #${pr.data.number}`);
+            // Try to enable auto-merge (will only succeed if repo allows it)
+            try {
+              const q = `query($owner:String!, $repo:String!, $number:Int!) { repository(owner:$owner, name:$repo) { pullRequest(number:$number) { id } } }`;
+              const qRes = await github.graphql(q, { owner, repo, number: pr.data.number });
+              const prId = qRes.repository.pullRequest.id;
+              const mutation = `mutation($prId:ID!, $mergeMethod: PullRequestMergeMethod!) { enablePullRequestAutoMerge(input:{pullRequestId:$prId, mergeMethod:$mergeMethod}) { pullRequest { number } } }`;
+              await github.graphql(mutation, { prId, mergeMethod: 'MERGE' });
+              console.log(`Enabled auto-merge for PR #${pr.data.number}`);
+            } catch (err) {
+              console.log(`Auto-merge enable failed or disallowed: ${err}`);
+            }
 
             return `updated: ${pr.data.number}`;
