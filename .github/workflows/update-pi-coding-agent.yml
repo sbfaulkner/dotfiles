@@ -52,8 +52,8 @@ jobs:
           PKG_PATH: pkgs/pi-coding-agent.nix
         with:
           script: |
-            const owner = github.context.repo?.owner || (process.env.GITHUB_REPOSITORY || '').split('/')[0];
-            const repo = github.context.repo?.repo || (process.env.GITHUB_REPOSITORY || '').split('/')[1];
+            const owner = github.context?.repo?.owner || (process.env.GITHUB_REPOSITORY || '').split('/')[0];
+            const repo = github.context?.repo?.repo || (process.env.GITHUB_REPOSITORY || '').split('/')[1];
             const latest = process.env.LATEST;
             const base = process.env.BASE;
             const path = process.env.PKG_PATH;
