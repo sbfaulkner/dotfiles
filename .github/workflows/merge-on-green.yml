@@ -43,18 +43,15 @@ jobs:
               return;
             }
 
-            // helper: identify update branches
-            const isAutoUpdateBranch = (ref) => {
-              return ref.startsWith('update/pi-coding-agent-v') || ref.startsWith('update/');
-            };
-
             for (const pr of prs) {
               const prNumber = pr.number;
               const headRef = pr.head.ref;
               console.log(`Found PR #${prNumber} for head ref ${headRef}`);
 
-              if (!isAutoUpdateBranch(headRef)) {
-                console.log(`Skipping PR #${prNumber}: head ref is not an auto-update branch.`);
+              // Require explicit 'merge-on-green' label to opt-in to auto-merge
+              const hasMergeOnGreenLabel = (pr.labels || []).some(l => l.name === 'merge-on-green');
+              if (!hasMergeOnGreenLabel) {
+                console.log(`Skipping PR #${prNumber}: missing 'merge-on-green' label.`);
                 continue;
               }
 
