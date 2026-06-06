@@ -133,8 +133,8 @@ jobs:
             const q = `query($owner:String!, $repo:String!, $number:Int!) { repository(owner:$owner, name:$repo) { pullRequest(number:$number) { id } } }`;
             const qRes = await github.graphql(q, { owner, repo, number: pr.data.number });
             const prId = qRes.repository.pullRequest.id;
-            const mutation = `mutation($prId:ID!, $method: PullRequestMergeMethod!) { enablePullRequestAutoMerge(input:{pullRequestId:$prId, mergeMethod:$method}) { pullRequest { number } } }`;
-            await github.graphql(mutation, { prId, method: 'MERGE' });
+            const mutation = `mutation($prId:ID!, $mergeMethod: PullRequestMergeMethod!) { enablePullRequestAutoMerge(input:{pullRequestId:$prId, mergeMethod:$mergeMethod}) { pullRequest { number } } }`;
+            await github.graphql(mutation, { prId, mergeMethod: 'MERGE' });
             console.log(`Enabled auto-merge for PR #${pr.data.number}`);
 
             return `updated: ${pr.data.number}`;
