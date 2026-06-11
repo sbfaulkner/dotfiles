@@ -74,11 +74,11 @@ jobs:
               return 'pr-exists';
             }
 
-            // Check if branch already exists
+            // If branch exists without an open PR, it's stale — delete it
             try {
               await github.rest.repos.getBranch({ owner, repo, branch });
-              console.log(`Branch ${branch} already exists; nothing to do.`);
-              return 'branch-exists';
+              console.log(`Stale branch ${branch} found (no open PR); deleting.`);
+              await github.rest.git.deleteRef({ owner, repo, ref: `heads/${branch}` });
             } catch (err) {
               if (err.status !== 404) throw err;
             }
