@@ -2,17 +2,19 @@ name: "Update pi-coding-agent"
 
 on:
   schedule:
-    # hourly check
     - cron: '0 * * * *'
+  check_suite:
+    types: [completed]
   workflow_dispatch: {}
 
 jobs:
   update:
+    # Run the update flow on schedule or manual dispatch
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: write
-      issues: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -44,8 +46,8 @@ jobs:
             exit 0
           fi
 
-      - name: "Controller: download, update file, create PR, enable auto-merge"
-        if: ${{ steps.compare.outputs.latest != steps.read_current.outputs.current }}
+      - name: Create PR and attempt merge
+        if: steps.compare.outputs.latest != steps.read_current.outputs.current
         uses: actions/github-script@v8
         env:
           LATEST: ${{ steps.compare.outputs.latest }}
@@ -53,20 +55,21 @@ jobs:
           PKG_PATH: pkgs/pi-coding-agent.nix
         with:
           script: |
-            const owner = github.context?.repo?.owner || (process.env.GITHUB_REPOSITORY || '').split('/')[0];
-            const repo = github.context?.repo?.repo || (process.env.GITHUB_REPOSITORY || '').split('/')[1];
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
             const latest = process.env.LATEST;
             const base = process.env.BASE;
             const path = process.env.PKG_PATH;
 
             console.log(`Update controller running for ${owner}/${repo}, latest=${latest}`);
 
-            // Build branch name
             const branch = `update/pi-coding-agent-v${latest}`;
 
-            // Check for existing open PR for this head
-            const prs = await github.rest.pulls.list({ owner, repo, head: `${owner}:${branch}`, state: 'open', per_page: 1 });
-            if (prs.data && prs.data.length > 0) {
+            // Check for existing open PR for this branch
+            const existingPRs = await github.rest.pulls.list({
+              owner, repo, head: `${owner}:${branch}`, state: 'open', per_page: 1,
+            });
+            if (existingPRs.data.length > 0) {
               console.log(`Open PR already exists for ${branch}; nothing to do.`);
               return 'pr-exists';
             }
@@ -94,24 +97,25 @@ jobs:
 
             // Read current file from base branch
             const file = await github.rest.repos.getContent({ owner, repo, path, ref: base });
-            if (!file || !file.data) throw new Error('Failed to read package file');
+            if (!file?.data) throw new Error('Failed to read package file');
             const fileSha = file.data.sha;
             const content = Buffer.from(file.data.content, 'base64').toString('utf8');
 
-            // Update version and hash in the file content
-            let newContent = content.replace(/version = \"[^\"]+\";/, `version = \"${latest}\";`);
-            newContent = newContent.replace(/hash = \"[^\"]+\";/, `hash = \"${newHash}\";`);
+            // Update version and hash
+            let newContent = content.replace(/version = "[^"]+";/, `version = "${latest}";`);
+            newContent = newContent.replace(/hash = "[^"]+";/, `hash = "${newHash}";`);
 
             if (newContent === content) {
-              console.log('No changes detected in file content after replacements; aborting.');
+              console.log('No changes detected after replacements; aborting.');
               return 'no-change';
             }
 
-            // Create new branch from base
+            // Create branch from base
             const baseRef = await github.rest.git.getRef({ owner, repo, ref: `heads/${base}` });
-            const baseSha = baseRef.data.object.sha;
             try {
-              await github.rest.git.createRef({ owner, repo, ref: `refs/heads/${branch}`, sha: baseSha });
+              await github.rest.git.createRef({
+                owner, repo, ref: `refs/heads/${branch}`, sha: baseRef.data.object.sha,
+              });
             } catch (err) {
               if (err.status === 422) {
                 console.log('Branch already created by another run; aborting.');
@@ -120,23 +124,103 @@ jobs:
               throw err;
             }
 
-            // Commit updated file to new branch
-            const contentB64 = Buffer.from(newContent, 'utf8').toString('base64');
+            // Commit updated file
             const commitMessage = `chore(pi): bump pi-coding-agent to ${latest}`;
-            await github.rest.repos.createOrUpdateFileContents({ owner, repo, path, message: commitMessage, content: contentB64, branch, sha: fileSha });
+            await github.rest.repos.createOrUpdateFileContents({
+              owner, repo, path, message: commitMessage,
+              content: Buffer.from(newContent, 'utf8').toString('base64'),
+              branch, sha: fileSha,
+            });
             console.log(`Pushed updated file to branch ${branch}`);
 
             // Create PR
-            const pr = await github.rest.pulls.create({ owner, repo, title: commitMessage, head: branch, base, body: 'Automated update by GitHub Actions' });
+            const pr = await github.rest.pulls.create({
+              owner, repo, title: commitMessage, head: branch, base,
+              body: 'Automated update by GitHub Actions',
+            });
             console.log(`Created PR #${pr.data.number}`);
 
-            // Add merge-on-green label so the merged-on-green workflow can opt-in
+            // Attempt immediate merge — succeeds when no checks are configured,
+            // fails gracefully if checks are pending (check_suite:completed will
+            // retry the merge when they finish).
             try {
-              await github.rest.issues.addLabels({ owner, repo, issue_number: pr.data.number, labels: ['merge-on-green'] });
-              console.log('Added label merge-on-green to PR');
+              const mergeRes = await github.rest.pulls.merge({
+                owner, repo, pull_number: pr.data.number, merge_method: 'merge',
+              });
+              console.log(`Merged PR #${pr.data.number}: ${mergeRes.data.sha}`);
             } catch (err) {
-              console.log(`Failed to add label to PR #${pr.data.number}: ${err}`);
+              console.log(`Merge not possible yet (checks may be pending): ${err.message}`);
             }
 
-            // Done: label added and PR created. merge-on-green workflow will handle merging when appropriate.
             return `updated: ${pr.data.number}`;
+
+  merge:
+    # Run the merge flow when a check suite completes
+    if: github.event_name == 'check_suite'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Merge if checks passed
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const suite = context.payload.check_suite;
+            const headBranch = suite.head_branch || '';
+
+            // Only act on our update branches
+            if (!headBranch.startsWith('update/pi-coding-agent-')) {
+              console.log(`Ignoring branch ${headBranch}`);
+              return;
+            }
+
+            console.log(`Check suite completed for ${headBranch} (conclusion: ${suite.conclusion})`);
+
+            if (suite.conclusion !== 'success' && suite.conclusion !== 'neutral') {
+              console.log(`Check suite not successful (${suite.conclusion}); skipping.`);
+              return;
+            }
+
+            // Find the open PR for this branch
+            const prs = suite.pull_requests || [];
+            if (prs.length === 0) {
+              console.log('No PRs associated with this check suite.');
+              return;
+            }
+
+            for (const prRef of prs) {
+              const pr = await github.rest.pulls.get({ owner, repo, pull_number: prRef.number });
+              if (pr.data.state !== 'open') {
+                console.log(`PR #${prRef.number} is ${pr.data.state}; skipping.`);
+                continue;
+              }
+
+              // Verify no failing or in-progress check runs remain
+              const headSha = pr.data.head.sha;
+              const runs = await github.rest.checks.listForRef({ owner, repo, ref: headSha });
+              const checkRuns = runs.data.check_runs || [];
+              const failing = checkRuns.filter(r =>
+                r.conclusion === 'failure' || r.conclusion === 'cancelled'
+              );
+              if (failing.length > 0) {
+                console.log(`${failing.length} check(s) failed; skipping PR #${prRef.number}.`);
+                continue;
+              }
+              const inProgress = checkRuns.filter(r => r.status !== 'completed');
+              if (inProgress.length > 0) {
+                console.log(`${inProgress.length} check(s) still running; skipping PR #${prRef.number}.`);
+                continue;
+              }
+
+              try {
+                const mergeRes = await github.rest.pulls.merge({
+                  owner, repo, pull_number: prRef.number, merge_method: 'merge',
+                });
+                console.log(`Merged PR #${prRef.number}: ${mergeRes.data.sha}`);
+              } catch (err) {
+                console.log(`Failed to merge PR #${prRef.number}: ${err.message}`);
+              }
+            }
