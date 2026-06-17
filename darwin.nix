@@ -20,6 +20,8 @@
       "ghostty"
       "godot"
       "google-chrome"
+      "dropbox"
+      "box-drive"
     ];
     onActivation = {
       autoUpdate = true;
