@@ -88,7 +88,7 @@ fi
 # determine local head and branch
 if [[ -d "$DOTFILES/.git" ]]; then
   branch=$(git -C "$DOTFILES" rev-parse --abbrev-ref HEAD 2>/dev/null || true)
-  local_head=$(git -C "$DOTFILES" rev-parse --short HEAD 2>/dev/null || true)
+  local_head=$(git -C "$DOTFILES" rev-parse HEAD 2>/dev/null || true)
 else
   echo "Dotfiles path $DOTFILES is not a git checkout." >&2
   exit 2
