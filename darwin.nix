@@ -17,6 +17,8 @@
     enable = true;
     casks = [
       "1password"
+      "box-drive"
+      "dropbox"
       "ghostty"
       "godot"
       "google-chrome"
