@@ -114,8 +114,12 @@ if [[ $FORCE -eq 0 && $last_success_epoch -ne 0 && $(( now_epoch - last_success_
   fi
 
   # interactive: prompt user to run reflake now (skip remote check)
-  printf "It\'s been %d days since the last successful reflake. Run reflake now? [y/N] " $(( (now_epoch - last_success_epoch) / 86400 ))
-  read -r ans || ans="n"
+  if ! is_tty && [[ $YES -eq 1 ]]; then
+    ans="y"
+  else
+    printf "It\'s been %d days since the last successful reflake. Run reflake now? [y/N] " $(( (now_epoch - last_success_epoch) / 86400 ))
+    read -r ans || ans="n"
+  fi
   if [[ "$ans" =~ ^[Yy]$ ]]; then
     if repo_dirty; then
       echo "Repo dirty; please stash/commit before running reflake." >&2
@@ -227,8 +231,12 @@ if [[ $remote_changed -eq 0 && $local_changed -eq 0 ]]; then
   # No immediate changes. If age threshold exceeded, prompt to run reflake.
   if [[ $FORCE -eq 1 || $(( now_epoch - last_check_epoch )) -ge $check_age_seconds ]]; then
     # prompt the user (interactive guaranteed here)
-    printf "It\'s been %d days since last check. Run reflake now? [y/N] " $(( (now_epoch - last_check_epoch) / 86400 ))
-    read -r ans || ans="n"
+    if ! is_tty && [[ $YES -eq 1 ]]; then
+      ans="y"
+    else
+      printf "It\'s been %d days since last check. Run reflake now? [y/N] " $(( (now_epoch - last_check_epoch) / 86400 ))
+      read -r ans || ans="n"
+    fi
     if [[ "$ans" =~ ^[Yy]$ ]]; then
       if repo_clean; then
         run_reflake || exit $?
@@ -252,8 +260,12 @@ action_performed=0
 if [[ $remote_changed -eq 1 ]]; then
   case "$MODE" in
     prompt)
-      printf "Remote has updates (origin/%s != local). Pull & reflake? [y/N] " "$branch"
-      read -r ans || ans="n"
+      if ! is_tty && [[ $YES -eq 1 ]]; then
+        ans="y"
+      else
+        printf "Remote has updates (origin/%s != local). Pull & reflake? [y/N] " "$branch"
+        read -r ans || ans="n"
+      fi
       if [[ "$ans" =~ ^[Yy]$ ]]; then
         if repo_clean; then
           git -C "$DOTFILES" pull --ff-only origin "$branch"
@@ -291,8 +303,12 @@ if [[ $remote_changed -eq 1 ]]; then
 elif [[ $local_changed -eq 1 ]]; then
   case "$MODE" in
     prompt)
-      printf "Local checkout changed since last reflake. Run reflake now? [y/N] "
-      read -r ans || ans="n"
+      if ! is_tty && [[ $YES -eq 1 ]]; then
+        ans="y"
+      else
+        printf "Local checkout changed since last reflake. Run reflake now? [y/N] "
+        read -r ans || ans="n"
+      fi
       if [[ "$ans" =~ ^[Yy]$ ]]; then
         run_reflake || exit $?
         action_performed=1
