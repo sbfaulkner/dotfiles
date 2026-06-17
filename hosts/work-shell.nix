@@ -37,9 +37,10 @@
     # Graphite completions
     eval "$(gt completion)"
 
-    # Run reflake check in background once-per-login (non-blocking)
-    if [[ -f $HOME/.config/dotfiles/check-reflake ]]; then
-      ("$HOME/.config/dotfiles/check-reflake" &) >/dev/null 2>&1 || true
+    # Run reflake check for interactive shells; run in foreground so prompts work
+    if [[ -x $HOME/.config/dotfiles/check-reflake ]] && [[ -o interactive ]]; then
+      # Run synchronously so the user can be prompted and choose to reflake now.
+      "$HOME/.config/dotfiles/check-reflake" || true
     fi
   '';
 
