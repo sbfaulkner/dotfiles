@@ -30,6 +30,11 @@
       url = "github:tobi/try-cli";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    herdr = {
+      url = "github:ogulcancelik/herdr";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs:
@@ -72,6 +77,7 @@
             ./hosts/personal.nix
             inputs._1password-shell-plugins.hmModules.default
             inputs.try-cli.homeModules.default
+            inputs.herdr.homeModules.default
           ];
           home-manager.users.sbfaulkner = import ./home;
         }
@@ -86,6 +92,7 @@
         ./hosts/work.nix
         inputs._1password-shell-plugins.hmModules.default
         inputs.try-cli.homeModules.default
+        inputs.herdr.homeModules.default
       ];
     };
 
