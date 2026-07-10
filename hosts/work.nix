@@ -59,9 +59,12 @@
   # homebrew module (see darwin.nix). Work uses standalone home-manager
   # (no nix-darwin), so we install idempotently via an activation script.
   home.activation.installCmux = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    if command -v brew >/dev/null 2>&1; then
-      brew tap manaflow-ai/cmux 2>/dev/null || true
-      brew install --cask cmux 2>/dev/null || true
+    brew="/opt/homebrew/bin/brew"
+    if [ ! -x "$brew" ]; then brew="/usr/local/bin/brew"; fi
+
+    if [ -x "$brew" ]; then
+      run "$brew" tap manaflow-ai/cmux
+      "$brew" list --cask cmux >/dev/null 2>&1 || run "$brew" install --cask cmux
     fi
   '';
 }
