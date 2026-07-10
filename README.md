@@ -35,7 +35,7 @@ scripts/
 | User packages | home-manager | CLI tools, runtimes, dev utilities |
 | Shell | home-manager | zsh, starship, direnv, aliases |
 | Git | home-manager | global config and gitignore |
-| Casks | Homebrew (declarative) | Personal GUI apps (1Password, Chrome, Ghostty, Godot) |
+| Casks | Homebrew (declarative) | Personal GUI apps (1Password, Chrome, Ghostty, Godot, cmux) |
 | Per-project deps | Project flakes + direnv | Language runtimes, native libs |
 
 ## Configurations
@@ -86,9 +86,9 @@ rm -f "$script"
 
 The personal target checks prerequisites, offers to uninstall an existing
 Determinate Nix install via `/nix/nix-installer uninstall`, installs Determinate
-Nix, installs Homebrew if needed, runs nix-darwin from the GitHub flake, installs
-personal Homebrew casks (1Password, Ghostty, Godot, and Google Chrome), and
-clones this repo to `~/src/github.com/sbfaulkner/dotfiles`.
+Nix, installs Homebrew if needed, runs nix-darwin from the GitHub flake (which
+installs personal Homebrew casks including 1Password, Ghostty, Godot, Google
+Chrome, and cmux), and clones this repo to `~/src/github.com/sbfaulkner/dotfiles`.
 
 For a non-interactive personal run, pass both `--target personal` and `--yes`:
 

@@ -53,4 +53,15 @@
     config.programs.starship.package  # prompt CLI (explain, toggle, etc.)
     pkgs.herdr
   ];
+
+  # cmux — install via Homebrew cask on work machines.
+  # The personal machine manages cmux declaratively through nix-darwin's
+  # homebrew module (see darwin.nix). Work uses standalone home-manager
+  # (no nix-darwin), so we install idempotently via an activation script.
+  home.activation.installCmux = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    if command -v brew >/dev/null 2>&1; then
+      brew tap manaflow-ai/cmux 2>/dev/null || true
+      brew install --cask cmux 2>/dev/null || true
+    fi
+  '';
 }
