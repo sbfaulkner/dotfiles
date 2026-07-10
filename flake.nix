@@ -65,7 +65,7 @@
       modules = [
         {
           nixpkgs.hostPlatform = "aarch64-darwin";
-          nixpkgs.overlays = [ glowOverlay ];
+          nixpkgs.overlays = [ glowOverlay inputs.herdr.overlays.default ];
         }
         ./darwin.nix
         inputs.home-manager.darwinModules.home-manager
@@ -77,7 +77,6 @@
             ./hosts/personal.nix
             inputs._1password-shell-plugins.hmModules.default
             inputs.try-cli.homeModules.default
-            inputs.herdr.homeModules.default
           ];
           home-manager.users.sbfaulkner = import ./home;
         }
@@ -92,7 +91,6 @@
         ./hosts/work.nix
         inputs._1password-shell-plugins.hmModules.default
         inputs.try-cli.homeModules.default
-        inputs.herdr.homeModules.default
       ];
     };
 
