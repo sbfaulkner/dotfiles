@@ -30,6 +30,11 @@
       url = "github:tobi/try-cli";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    herdr = {
+      url = "github:ogulcancelik/herdr";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs:
@@ -60,7 +65,7 @@
       modules = [
         {
           nixpkgs.hostPlatform = "aarch64-darwin";
-          nixpkgs.overlays = [ glowOverlay ];
+          nixpkgs.overlays = [ glowOverlay inputs.herdr.overlays.default ];
         }
         ./darwin.nix
         inputs.home-manager.darwinModules.home-manager

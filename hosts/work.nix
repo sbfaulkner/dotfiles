@@ -51,5 +51,6 @@
     pkgs.glow_1_5_1  # Markdown previews in less; pinned for ANSI compatibility
     pkgs.home-manager  # needed so `reflake` alias can find home-manager
     config.programs.starship.package  # prompt CLI (explain, toggle, etc.)
+    pkgs.herdr
   ];
 }

@@ -4,6 +4,7 @@
 {
   home.packages = [
     (pkgs.callPackage ../pkgs/pi-coding-agent.nix { })
+    pkgs.herdr
   ];
 
   programs.zsh.shellAliases.reflake = "sudo darwin-rebuild switch --flake ~/src/github.com/sbfaulkner/dotfiles#sbfaulkner";
