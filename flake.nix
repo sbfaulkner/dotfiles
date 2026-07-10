@@ -45,7 +45,7 @@
 
       pkgsFor = system: import inputs.nixpkgs {
         inherit system;
-        overlays = [ glowOverlay ];
+        overlays = [ glowOverlay inputs.herdr.overlays.default ];
       };
     in
     {
