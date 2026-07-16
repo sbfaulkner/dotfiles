@@ -19,11 +19,11 @@ let
 in
 stdenvNoCC.mkDerivation rec {
   pname = "pi-coding-agent";
-  version = "0.80.7";
+  version = "0.80.8";
 
   src = fetchurl {
     url = "https://github.com/earendil-works/pi/releases/download/v${version}/pi-darwin-arm64.tar.gz";
-    hash = "sha256-DxV3HvduzWmwPij+zwxRJZP/biR3rPOeNbwsikBW0eM=";
+    hash = "sha256-8XD9YZ7TrS0OGdrdGSC9hPZRgXTCO2D0KRENiZuznfs=";
   };
 
   sourceRoot = "pi";
