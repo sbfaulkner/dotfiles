@@ -39,7 +39,6 @@
   };
   programs.pi.extraPackages = [
     "https://github.com/shopify-playground/shop-pi-fy"
-    "https://github.com/davebcn87/pi-autoresearch"
     "https://github.com/shopify-playground/pi-usage-awareness"
   ];
 

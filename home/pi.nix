@@ -49,7 +49,7 @@ in
       description = ''
         Additional pi packages to install via `pi install` on every
         activation.  Use for git-hosted packages that should be cloned
-        into ~/.pi/agent/git/ (e.g. shop-pi-fy, pi-autoresearch).
+        into ~/.pi/agent/git/ (e.g. shop-pi-fy, pi-usage-awareness).
         Idempotent — already-installed packages are skipped.
       '';
     };
@@ -98,10 +98,13 @@ SEED_EOF
     '';
 
     # Install extra git-hosted packages via `pi install` (idempotent).
+    # Pin PI_CODING_AGENT_DIR: `pi install` writes to whichever agent dir is
+    # active, and activation can run from a shell that points it elsewhere
+    # (bb's Pi threads use ~/.pi/bb-agent).
     home.activation.installPiPackages = lib.hm.dag.entryAfter [ "writeBoundary" "seedPiSettings" ] (
       lib.concatMapStringsSep "\n" (pkg: ''
         verboseEcho "Ensuring pi package: ${pkg}"
-        run pi install ${pkg} 2>/dev/null || verboseEcho "pi install ${pkg} skipped or failed"
+        run env PI_CODING_AGENT_DIR="$HOME/.pi/agent" pi install ${pkg} 2>/dev/null || verboseEcho "pi install ${pkg} skipped or failed"
       '') cfg.extraPackages
     );
   };
