@@ -28,12 +28,10 @@
     ];
     extensions = [
       "-extensions/vim-mode/index.ts"
-      "+extensions/chrome-devtools/index.ts"
       "+extensions/web-search/index.ts"
       "-extensions/rtk-rewrite/index.ts"
     ];
     skills = [
-      "+skills/agent-world/SKILL.md"
       "-skills/talent-shopify/SKILL.md"
     ];
   };
