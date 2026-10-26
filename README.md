@@ -183,8 +183,10 @@ Pi configuration is managed by `home/pi.nix`:
   `~/src/github.com/sbfaulkner/pi-extensions` is cloned and registered as a
   package source. If the repo is already present, it is left as-is.
 - **Extra packages (work only)** — `hosts/work.nix` uses `pi install` to add
-  git-hosted packages (shop-pi-fy, pi-autoresearch, pi-usage-awareness) that
-  clone into `~/.pi/agent/git/`.
+  git-hosted packages (shop-pi-fy, pi-usage-awareness) that clone into
+  `~/.pi/agent/git/`. Activation pins `PI_CODING_AGENT_DIR` to `~/.pi/agent`
+  so a shell pointing pi at another agent dir (bb's `~/.pi/bb-agent`) can't
+  redirect the installs.
 
 To regenerate settings from scratch, delete `~/.pi/agent/settings.json` and run
 `reflake`.
