@@ -35,7 +35,6 @@
     skills = [
       "+skills/agent-world/SKILL.md"
       "-skills/talent-shopify/SKILL.md"
-      "-skills/graphite/SKILL.md"
     ];
   };
   programs.pi.extraPackages = [

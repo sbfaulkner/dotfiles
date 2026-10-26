@@ -34,9 +34,6 @@
     for file in $HOME/src/github.com/Shopify/cloudplatform/workflow-utils/*.bash; do source ''${file}; done
     kubectl-short-aliases
 
-    # Graphite completions
-    eval "$(gt completion)"
-
     # Run reflake check for interactive shells; run in foreground so prompts work
     if [[ -x $HOME/.config/dotfiles/check-reflake ]] && [[ -o interactive ]]; then
       # Run synchronously so the user can be prompted and choose to reflake now.
