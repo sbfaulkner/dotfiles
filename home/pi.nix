@@ -99,8 +99,7 @@ SEED_EOF
 
     # Install extra git-hosted packages via `pi install` (idempotent).
     # Pin PI_CODING_AGENT_DIR: `pi install` writes to whichever agent dir is
-    # active, and activation can run from a shell that points it elsewhere
-    # (bb's Pi threads use ~/.pi/bb-agent).
+    # active, so a shell that points it elsewhere can't redirect the installs.
     home.activation.installPiPackages = lib.hm.dag.entryAfter [ "writeBoundary" "seedPiSettings" ] (
       lib.concatMapStringsSep "\n" (pkg: ''
         verboseEcho "Ensuring pi package: ${pkg}"
