@@ -15,13 +15,10 @@
   # CLI tools belong in home-manager (home/tools.nix) instead.
   homebrew = {
     enable = true;
-    taps = [
-      "manaflow-ai/cmux"
-    ];
+    taps = [ ];
     casks = [
       "1password"
       "box-drive"
-      "cmux"
       "dropbox"
       "ghostty"
       "godot"
