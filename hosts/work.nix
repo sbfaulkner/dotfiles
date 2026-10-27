@@ -14,17 +14,19 @@
   # secrets function depends on them before Homebrew/work init runs.
   # Pi — work model/provider defaults and extra packages.
   programs.pi.settings = {
-    defaultProvider = "anthropic-250k-prefer-using-this-one";
-    defaultModel = "claude-opus-4-6";
+    defaultProvider = "anthropic";
+    defaultModel = "claude-opus-5-5";
+    defaultThinkingLevel = "high";
     enabledModels = [
-      "anthropic/claude-haiku-4-5"
-      "anthropic-250k-prefer-using-this-one/claude-sonnet-4-6"
-      "anthropic-250k-prefer-using-this-one/claude-opus-4-6"
-      "openai/gpt-5.4"
-      "openai/gpt-5.4-mini"
-      "openai/gpt-5.4-nano"
-      "anthropic-250k-prefer-using-this-one/claude-opus-4-7"
-      "openai/gpt-5.5"
+      "fireworks-300k/glm-5.2"
+      "fireworks-300k/fireworks:accounts/fireworks/routers/glm-5p2-fast"
+      "openai/gpt-5.6-terra"
+      "openai/gpt-5.6-luna"
+      "anthropic/claude-opus-5-5"
+      "anthropic-250k-prefer-using-this-one/claude-fable-5-1"
+      "anthropic-250k-prefer-using-this-one/claude-sonnet-5-5"
+      "openai/gpt-6-sol"
+      "openai/gpt-6-astra"
     ];
     skills = [
       "-skills/talent-shopify/SKILL.md"
