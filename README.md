@@ -182,11 +182,15 @@ Pi configuration is managed by `home/pi.nix`:
 - **`pi-extensions` clone** — ensures
   `~/src/github.com/sbfaulkner/pi-extensions` is cloned and registered as a
   package source. If the repo is already present, it is left as-is.
-- **Extra packages (work only)** — `hosts/work.nix` uses `pi install` to add
-  git-hosted packages (shop-pi-fy, pi-usage-awareness) that clone into
-  `~/.pi/agent/git/`. Activation pins `PI_CODING_AGENT_DIR` to `~/.pi/agent`
-  so a shell pointing pi at another agent dir (bb's `~/.pi/bb-agent`) can't
-  redirect the installs.
+- **One lean profile (work)** — terminal pi and bb's Pi threads share
+  `~/.pi/agent`; there is no second agent dir. The work seed loads only the
+  `secrets` extension from pi-extensions. Brain comes from bb's Brain plugin,
+  not brain's pi extension.
+- **shop-pi-fy (work only)** — `hosts/work.nix` uses `pi install` to clone it
+  into `~/.pi/agent/git/`, with every resource filtered out, so `pi update`
+  keeps it current. Activation links its `web-search` and `world` extensions
+  into `~/.pi/agent/extensions/`. Activation pins `PI_CODING_AGENT_DIR` to
+  `~/.pi/agent` so a shell pointing pi elsewhere can't redirect the installs.
 
 To regenerate settings from scratch, delete `~/.pi/agent/settings.json` and run
 `reflake`.

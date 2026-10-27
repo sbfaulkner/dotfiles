@@ -26,19 +26,62 @@
       "anthropic-250k-prefer-using-this-one/claude-opus-4-7"
       "openai/gpt-5.5"
     ];
-    extensions = [
-      "-extensions/vim-mode/index.ts"
-      "+extensions/web-search/index.ts"
-      "-extensions/rtk-rewrite/index.ts"
-    ];
     skills = [
       "-skills/talent-shopify/SKILL.md"
+      "-skills/agent-tools/SKILL.md"
+      "-skills/gws-sheets/SKILL.md"
+      "-skills/gws-shared/SKILL.md"
+      "-skills/gws-gmail-triage/SKILL.md"
+      "-skills/gws-gmail-read/SKILL.md"
+      "-skills/gws-gmail/SKILL.md"
+      "-skills/gws-drive-upload/SKILL.md"
+      "-skills/gws-drive/SKILL.md"
+      "-skills/gws-docs-write/SKILL.md"
+      "-skills/gws-docs/SKILL.md"
+      "-skills/gws-calendar-agenda/SKILL.md"
+      "-skills/gws-calendar/SKILL.md"
+    ];
+    # One lean profile shared by terminal pi and bb's Pi threads. Replaces the
+    # base packages list (attrset merge), so pi-extensions is repeated here.
+    # Brain comes from bb's Brain plugin, not brain's pi extension.
+    packages = [
+      {
+        source = "~/src/github.com/sbfaulkner/pi-extensions";
+        extensions = [ "secrets/index.ts" ];
+        skills = [
+          "-skills/git-workflow/SKILL.md"
+          "-skills/gws-docs-markdown/SKILL.md"
+        ];
+      }
+      # Loads nothing; listed so `pi update` keeps the checkout current for
+      # the web-search and world symlinks below.
+      {
+        source = "https://github.com/shopify-playground/shop-pi-fy";
+        extensions = [ ];
+        skills = [ ];
+        prompts = [ ];
+        themes = [ ];
+      }
     ];
   };
+  # `pi install` keeps an existing package entry's filters, so this only
+  # ensures the checkout exists.
   programs.pi.extraPackages = [
     "https://github.com/shopify-playground/shop-pi-fy"
-    "https://github.com/shopify-playground/pi-usage-awareness"
   ];
+
+  # web-search and world from the shop-pi-fy checkout. Its manifest declares
+  # only its /pkg manager, so these load as linked extensions, not through
+  # package filters.
+  home.activation.linkPiShopPiFyExtensions = lib.hm.dag.entryAfter [ "installPiPackages" ] ''
+    shop_pi_fy="$HOME/.pi/agent/git/github.com/shopify-playground/shop-pi-fy"
+    for ext in web-search world; do
+      if [ -d "$shop_pi_fy/extensions/$ext" ]; then
+        run mkdir -p "$HOME/.pi/agent/extensions"
+        run ln -sfn "$shop_pi_fy/extensions/$ext" "$HOME/.pi/agent/extensions/$ext"
+      fi
+    done
+  '';
 
   home.packages = lib.mkForce [
     config.home.sessionVariablesPackage
